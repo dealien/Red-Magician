@@ -1,0 +1,87 @@
+import discord
+from discord.ext import commands
+import operator
+
+
+class GameList:
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command(pass_context=True, no_pm=True)
+    async def playing(self, ctx, *, game):
+        """Shows a list of all the people playing a game."""
+
+        print(colored('Creating list of played games', 'yellow'))
+
+        user = ctx.message.author
+        server = ctx.message.server
+        members = server.members
+
+        playing_game = ""
+        count_playing = 0
+        for member in members:
+            if not member:
+                continue
+            if not member.game or not member.game.name:
+                continue
+            if member.bot:
+                continue
+            count_playing += 1
+            playing_game += "▸ {} ({})\n".format(member.name,
+                                                 member.game.name)
+
+        if playing_game == "":
+            await self.bot.say("No one is playing anything.")
+        else:
+            msg = playing_game
+            em = discord.Embed(description=msg, colour=user.colour)
+            if count_playing > 15:
+                showing = "(Showing 15/{})".format(count_playing)
+            else:
+                showing = "({})".format(count_playing)
+            text = "These are the people who are playing"
+            text += "{}:\n{}".format(game, showing)
+            em.set_author(name=text)
+            await self.bot.say(embed=em)
+
+    @commands.command(pass_context=True, no_pm=True)
+    async def gamelist(self, ctx):
+        """Shows the currently most played games"""
+        user = ctx.message.author
+        server = ctx.message.server
+        members = server.members
+
+        freq_list = {}
+        for member in members:
+            if not member:
+                continue
+            if not member.game or not member.game.name:
+                continue
+            if member.bot:
+                continue
+            if member.game.name not in freq_list:
+                freq_list[member.game.name] = 0
+            freq_list[member.game.name] += 1
+
+        sorted_list = sorted(freq_list.items(),
+                             key=operator.itemgetter(1),
+                             reverse=True)
+
+        if not freq_list:
+            await self.bot.say("Surprisingly, no one is playing anything.")
+        else:
+            # create display
+            msg = ""
+            max_games = min(len(sorted_list), 10)
+            for i in range(max_games):
+                game, freq = sorted_list[i]
+                msg += "▸ {}: __{}__\n".format(game, freq_list[game])
+
+            em = discord.Embed(description=msg, colour=user.colour)
+            em.set_author(name="These are the server's most played games at the moment:")
+            await self.bot.say(embed=em)
+
+
+def setup(bot):
+    n = GameList(bot)
+    bot.add_cog(n)

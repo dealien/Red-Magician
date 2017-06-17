@@ -19,6 +19,9 @@ try:
 except ImportError:
     pip = None
 
+# Allows logging to a file
+# https://docs.python.org/3/howto/logging.html
+
 REQS_DIR = "lib"
 sys.path.insert(0, REQS_DIR)
 REQS_TXT = "requirements.txt"
