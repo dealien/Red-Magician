@@ -56,7 +56,10 @@ try:
     from . import _imaging as core
     if PILLOW_VERSION != getattr(core, 'PILLOW_VERSION', None):
         raise ImportError("The _imaging extension was built for another "
-                          "version of Pillow or PIL")
+                          "version of Pillow or PIL: Core Version: %s"
+                          "Pillow Version:  %s" %
+                          (getattr(core, 'PILLOW_VERSION', None),
+                           PILLOW_VERSION))
 
 except ImportError as v:
     core = _imaging_not_installed()
@@ -274,7 +277,7 @@ def _conv_type_shape(im):
         return shape+(extra,), typ
 
 
-MODES = sorted(_MODEINFO.keys())
+MODES = sorted(_MODEINFO)
 
 # raw modes that may be memory mapped.  NOTE: if you change this, you
 # may have to modify the stride calculation in map.c too!
@@ -558,16 +561,16 @@ class Image(object):
 
         if getattr(self, 'map', None):
             self.map = None
-    
+
         # Instead of simply setting to None, we're setting up a
         # deferred error that will better explain that the core image
         # object is gone.
         self.im = deferred_error(ValueError("Operation on closed image"))
 
-    if sys.version_info >= (3,4,0):
+    if sys.version_info >= (3, 4, 0):
         def __del__(self):
-            if (hasattr(self, 'fp') and hasattr(self, '_exclusive_fp') 
-                and self.fp and self._exclusive_fp):
+            if (hasattr(self, 'fp') and hasattr(self, '_exclusive_fp')
+               and self.fp and self._exclusive_fp):
                 self.fp.close()
             self.fp = None
 
@@ -577,7 +580,7 @@ class Image(object):
         self.pyaccess = None
         self.readonly = 0
 
-    def _dump(self, file=None, format=None):
+    def _dump(self, file=None, format=None, **options):
         import tempfile
         suffix = ''
         if format:
@@ -592,7 +595,7 @@ class Image(object):
         else:
             if not file.endswith(format):
                 file = file + "." + format
-            self.save(file, format)
+            self.save(file, format, **options)
         return file
 
     def __eq__(self, other):
@@ -1042,6 +1045,20 @@ class Image(object):
         if box is None:
             return self.copy()
 
+        return self._new(self._crop(self.im, box))
+
+    def _crop(self, im, box):
+        """
+        Returns a rectangular region from the core image object im.
+
+        This is equivalent to calling im.crop((x0, y0, x1, y1)), but
+        includes additional sanity checks.
+
+        :param im: a core image object
+        :param box: The crop rectangle, as a (left, upper, right, lower)-tuple.
+        :returns: A core image object.
+        """
+
         x0, y0, x1, y1 = map(int, map(round, box))
 
         if x1 < x0:
@@ -1049,8 +1066,10 @@ class Image(object):
         if y1 < y0:
             y1 = y0
 
-        return self._new(self.im.crop((x0, y0, x1, y1)))
+        _decompression_bomb_check((x1, y1))
 
+        return im.crop((x0, y0, x1, y1))
+         
     def draft(self, mode, size):
         """
         Configures the image file loader so it returns a version of the
@@ -1062,6 +1081,9 @@ class Image(object):
         Note that this method modifies the :py:class:`~PIL.Image.Image` object
         in place.  If the image has already been loaded, this method has no
         effect.
+
+        Note: This method is not implemented for most images. It is
+        currently implemented only for JPEG and PCD images.
 
         :param mode: The requested mode.
         :param size: The requested size.
@@ -1354,6 +1376,54 @@ class Image(object):
         else:
             self.im.paste(im, box)
 
+    def alpha_composite(self, im, dest=(0,0), source=(0,0)):
+        """ 'In-place' analog of Image.alpha_composite. Composites an image
+        onto this image.
+
+        :param im: image to composite over this one
+        :param dest: Optional 2 tuple (top, left) specifying the upper
+          left corner in this (destination) image.
+        :param source: Optional 2 (top, left) tuple for the upper left
+          corner in the overlay source image, or 4 tuple (top, left, bottom,
+          right) for the bounds of the source rectangle
+          
+        Performance Note: Not currently implemented in-place in the core layer.
+        """
+
+        if not isinstance(source, tuple):
+            raise ValueError("Source must be a tuple")
+        if not isinstance(dest, tuple):
+            raise ValueError("Destination must be a tuple")
+        if not len(source) in (2, 4):
+            raise ValueError("Source must be a 2 or 4-tuple")
+        if not len(dest) == 2:
+            raise ValueError("Destination must be a 2-tuple")
+        if min(source) < 0:
+            raise ValueError("Source must be non-negative")
+        if min(dest) < 0:
+            raise ValueError("Destination must be non-negative")
+
+        if len(source) == 2:
+            source = source + im.size
+
+        # over image, crop if it's not the whole thing. 
+        if source == (0,0) + im.size:
+            overlay = im
+        else:
+            overlay = im.crop(source)
+
+        # target for the paste
+        box = dest + (dest[0] + overlay.width, dest[1] + overlay.height)
+            
+        # destination image. don't copy if we're using the whole image.
+        if dest == (0,0) + self.size:
+            background = self
+        else:
+            background = self.crop(box)
+                        
+        result = alpha_composite(background, overlay)
+        self.paste(result, box)
+        
     def point(self, lut, mode=None):
         """
         Maps this image through a lookup table or function.
@@ -1532,16 +1602,16 @@ class Image(object):
     def remap_palette(self, dest_map, source_palette=None):
         """
         Rewrites the image to reorder the palette.
-        
+
         :param dest_map: A list of indexes into the original palette.
            e.g. [1,0] would swap a two item palette, and list(range(255))
            is the identity transform.
         :param source_palette: Bytes or None.
-        :returns:  An :py:class:`~PIL.Image.Image` object. 
-        
+        :returns:  An :py:class:`~PIL.Image.Image` object.
+
         """
         from . import ImagePalette
-        
+
         if self.mode not in ("L", "P"):
             raise ValueError("illegal image mode")
 
@@ -1550,7 +1620,6 @@ class Image(object):
                 source_palette = self.im.getpalette("RGB")[:768]
             else:  # L-mode
                 source_palette = bytearray(i//3 for i in range(768))
-           
 
         palette_bytes = b""
         new_positions = [0]*256
@@ -1586,8 +1655,8 @@ class Image(object):
         m_im.palette = ImagePalette.ImagePalette("RGB",
                                                  palette=mapping_palette*3,
                                                  size=768)
-        #possibly set palette dirty, then
-        #m_im.putpalette(mapping_palette, 'L')  # converts to 'P'
+        # possibly set palette dirty, then
+        # m_im.putpalette(mapping_palette, 'L')  # converts to 'P'
         # or just force it.
         # UNDONE -- this is part of the general issue with palettes
         m_im.im.putpalette(*m_im.palette.getdata())
@@ -1603,8 +1672,6 @@ class Image(object):
                                                  size=len(palette_bytes))
 
         return m_im
-        
-        
 
     def resize(self, size, resample=NEAREST):
         """
@@ -2624,6 +2691,7 @@ def registered_extensions():
         init()
     return EXTENSION
 
+
 def register_decoder(name, decoder):
     """
     Registers an image decoder.  This function should not be
@@ -2633,7 +2701,7 @@ def register_decoder(name, decoder):
     :param decoder: A callable(mode, args) that returns an
                     ImageFile.PyDecoder object
 
-    .. versionadded:: 4.1.0                
+    .. versionadded:: 4.1.0
     """
     DECODERS[name] = decoder
 

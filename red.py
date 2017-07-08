@@ -133,6 +133,7 @@ class Bot(commands.Bot):
     async def send_cmd_help(self, ctx):
         if ctx.invoked_subcommand:
             pages = self.formatter.format_help_for(ctx, ctx.invoked_subcommand)
+            logging.info(pages)
             for page in pages:
                 await self.send_message(ctx.message.channel, page)
         else:
