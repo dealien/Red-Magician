@@ -1,4 +1,8 @@
 import discord
+from discord.ext import commands
+from cogs.utils import checks
+from cogs.utils.dataIO import dataIO
+
 
 
 def default_check(reaction, user):
@@ -8,7 +12,9 @@ def default_check(reaction, user):
         return True
 
 
-class Menu():
+class ReactMenu():
+    """Allows the creation of interactive, emoji-controlled menus."""
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -52,6 +58,7 @@ class Menu():
             await self.bot.add_reaction(message, str(emoji['next']))
         return
 
+    @commands.command()
     async def menu(self, ctx,
                    _type: int,
                    messages,
@@ -91,6 +98,7 @@ class Menu():
 
             loop (Defaults to False):
                 Whether or not the pages loop to the first page at the end"""
+
         result = None
         if _type == 1:
             result = await self._number_menu(ctx, messages, choices, **kwargs)
@@ -234,3 +242,6 @@ class Menu():
             timeout=timeout,
             check=check, is_open=is_open,
             emoji=emoji, message=message)
+
+def setup(bot):
+    bot.add_cog(ReactMenu(bot))
