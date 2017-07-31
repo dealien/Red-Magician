@@ -84,7 +84,7 @@ class SCIENCE:
         if not server:
             server = ctx.message.server.id
             servername = ctx.message.server
-            await self.bot.say('These are all the logged attachments for ' + str(servername) + ' (' + str(server) + ')')
+            await self.bot.say('These are all the logged attachments for ' + str(servername) + ' (Server ID: ' + str(server) + ')')
         else:
             await self.bot.say('These are all the logged attachments for ' + str(server))
         B = ['.log', '.json']
@@ -93,9 +93,15 @@ class SCIENCE:
         for path, subdirs, filelist in os.walk("/home/red/Red-DiscordBot/data/activitylogger/" + server):
             for file in filelist:
                 files_.append(str(file))
-        files = [word for word in files_ if not blacklist.search(word)]
+        ifiles = [word for word in files_ if not blacklist.search(word)]
+        files = []
+        for item in ifiles:
+            indexid = item[:18]
+            filename = item[19:]
+            files.append(indexid + "   " + filename)
         await self.bot.say('Number of files: ' + str(len(files)))
         pages = paginate_string(files)
+        await self.bot.say('Number of pages: ' + str(len(pages)))
         for page in pages:
             await self.bot.say(page)
             # This pause reduces the choppyness of the messages by going as fast as Discord allows but at regular intervals
