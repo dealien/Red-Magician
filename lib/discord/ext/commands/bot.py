@@ -32,19 +32,11 @@ import sys
 import traceback
 import re
 
-# Allows logging to a file
-# https://docs.python.org/3/howto/logging.html
-import logging
-logging.basicConfig(format='%(asctime)s       %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', filename='red.log', level=logging.INFO)
-
 from .core import GroupMixin, Command, command
 from .view import StringView
 from .context import Context
 from .errors import CommandNotFound, CommandError
 from .formatter import HelpFormatter
-# Allows colored terminal output
-# Used for debugging purposes when printing output to the console
-from termcolor import colored 
 
 def _get_variable(name):
     stack = inspect.stack()
@@ -354,8 +346,6 @@ class Bot(GroupMixin, discord.Client):
         params = {
             k: kwargs.pop(k, None) for k in extensions
         }
-
-        print('message sent to channel ' + colored('#' + str(destination), 'blue') + ' with parameters ' + colored(str(params), 'magenta'))
 
         coro = self.send_message(destination, *args, **kwargs)
         return self._augmented_msg(coro, **params)
@@ -823,9 +813,6 @@ class Bot(GroupMixin, discord.Client):
         _internal_author = message.author
 
         view = StringView(message.content)
-
-        print(colored('#' + str(message.channel), 'blue') + colored('  @' + str(message.author), 'cyan') + ':  ' + str(message.content))
-
         if self._skip_check(message.author, self.user):
             return
 
@@ -849,7 +836,6 @@ class Bot(GroupMixin, discord.Client):
             'view': view,
             'prefix': invoked_prefix
         }
-
         ctx = Context(**tmp)
         del tmp
 
@@ -858,12 +844,8 @@ class Bot(GroupMixin, discord.Client):
             self.dispatch('command', command, ctx)
             try:
                 yield from command.invoke(ctx)
-                print('command ' + colored(str(invoker), 'yellow') + ' triggered by ' + colored('@' + str(message.author), 'cyan') + ' in ' + colored('#' + str(message.channel), 'blue'))
-
             except CommandError as e:
                 ctx.command.dispatch_error(e, ctx)
-                print(colored('An error occurred', 'red'))
-
             else:
                 self.dispatch('command_completion', command, ctx)
         elif invoker:
