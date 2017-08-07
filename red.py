@@ -350,7 +350,7 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
 
     @bot.event
     async def on_command_error(error, ctx):
-        print(colored('Error in command ', 'red') + colored('$' + str(ctx.command.qualified_name), 'yellow') + colored(' in channel ', 'red') + colored(str(ctx.message.server), 'green') + colored('#' + str(ctx.message.channel), 'blue'))
+        print(colored('Error in command ', 'red') + colored('$' + str(ctx.command), 'yellow') + colored(' in channel ', 'red') + colored(str(ctx.message.server), 'green') + colored('#' + str(ctx.message.channel), 'blue'))
         channel = ctx.message.channel
         if isinstance(error, commands.MissingRequiredArgument):
             await bot.send_cmd_help(ctx)
