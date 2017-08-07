@@ -7,6 +7,7 @@ import logging.handlers
 import traceback
 import datetime
 import subprocess
+from termcolor import colored
 
 try:
     from discord.ext import commands
@@ -139,6 +140,7 @@ class Bot(commands.Bot):
             pages = self.formatter.format_help_for(ctx, ctx.command)
             for page in pages:
                 await self.send_message(ctx.message.channel, page)
+            print('Help for command ' + colored('$' + str(ctx.command), 'yellow') + ' sent to ' + colored('#' + str(ctx.message.channel), 'blue'))
 
     def user_allowed(self, message):
         author = message.author
@@ -338,6 +340,7 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
     @bot.event
     async def on_command(command, ctx):
         bot.counter["processed_commands"] += 1
+        print('Command ' + colored('$' + str(command), 'yellow') + ' executed in channel ' + colored(str(ctx.message.server), 'green') + colored('#' + str(ctx.message.channel), 'blue'))
 
     @bot.event
     async def on_message(message):
@@ -375,6 +378,7 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
             log += "".join(traceback.format_exception(type(error), error,
                                                       error.__traceback__))
             bot._last_exception = log
+            print(colored('Error in command ', 'red') + colored('$' + str(ctx.command.qualified_name), 'yellow'))
             await ctx.bot.send_message(channel, inline(message))
         elif isinstance(error, commands.CommandNotFound):
             pass
