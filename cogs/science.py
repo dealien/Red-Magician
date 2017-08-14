@@ -50,6 +50,14 @@ class SCIENCE:
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.command(pass_context=True)
+    async def test(self, ctx):
+        server = ctx.message.server
+        servers = []
+        for server in self.bot.servers:
+            servers.append(server.name)
+            print(str(server))
+
     @commands.command()
     async def punch(self, user : discord.Member):
         """I will puch anyone! >.<"""
@@ -71,16 +79,16 @@ class SCIENCE:
     #     except:
     #         await self.bot.say("Couldn't load amount of players. No one is playing this game anymore or there's an error.")
 
-    @commands.group(name="files", pass_context=True)
+    @commands.group(name="file", pass_context=True)
     async def _files(self, ctx):
         """Logged file operations"""
         if ctx.invoked_subcommand is None:
             await send_cmd_help(ctx)
 
-    @_files.command(pass_context=True)
+    @_file.command(pass_context=True)
     @checks.serverowner_or_permissions(administrator=True)
     async def list(self, ctx, serverid=None):
-        """List names of all logged file attachments for the specified server."""
+        """List names of all logged file attachments for the specified server. Default is the current server if no other server is specified. """
         if not serverid:
             serverid = ctx.message.server.id
         server = self.bot.get_server(serverid)
@@ -107,31 +115,49 @@ class SCIENCE:
             # This pause reduces the choppyness of the messages by going as fast as Discord allows but at regular intervals
             time.sleep(1)
 
-    @_files.command(pass_context=True)
+    @_file.command(pass_context=True)
+    @checks.serverowner_or_permissions(administrator=True)
     async def info(self, ctx):
-        """Show info about logged file attachments for the current server."""
+        """Show info about logged file attachments for all servers."""
         server = ctx.message.server.id
-        servername = ctx.message.server
+        servers = []
+        for server in self.bot.servers:
+            servers.append(server)
+        print(servers)
         B = ['.log', '.json']
         blacklist = re.compile('|'.join([re.escape(word) for word in B]))
-        files_ = []
-        for path, subdirs, filelist in os.walk("/home/red/Red-DiscordBot/data/activitylogger/" + server):
-            for file in filelist:
-                files_.append(str(file))
-        files = [word for word in files_ if not blacklist.search(word)]
-        imageextensions = ['.png', '.jpg', 'jpeg', '.gif']
-        imagefiles = []
-        for filename in files:
-            for ext in imageextensions:
-                if filename.endswith(ext):
-                    imagefiles.append(filename)
 
-        message=discord.Embed(title=str(servername), color=0x000000)
-        message.add_field(name="Files", value=str(len(files)), inline=True)
-        message.add_field(name="Total Size", value=str(get_size("/home/red/Red-DiscordBot/data/activitylogger/" + server)) + " Bytes", inline=True)
-        message.add_field(name="Images", value=str(len(imagefiles)), inline=False)
-        message.set_footer(text=str(datetime.now()))
-        await self.bot.say(embed=message)
+        filecounts = []
+        imagefilecounts = []
+        filesizes = []
+
+        for server in servers:
+            files_ = []
+            for path, subdirs, filelist in os.walk("/home/red/Red-DiscordBot/data/activitylogger/" + server.id):
+                for file in filelist:
+                    files_.append(str(file))
+            files = [word for word in files_ if not blacklist.search(word)]
+            imageextensions = ['.png', '.jpg', 'jpeg', '.gif']
+            imagefiles = []
+            for filename in files:
+                for ext in imageextensions:
+                    if filename.endswith(ext):
+                        imagefiles.append(filename)
+            filecounts.append(str(len(files)))
+            imagefilecounts.append(str(len(imagefiles)))
+            filesizes.append(str(round(get_size("/home/red/Red-DiscordBot/data/activitylogger/" + server.id)/1000000, 3)) + ' MB')
+
+        await self.bot.say('File Info:')
+        lines = ['File Info:']
+        i = 0
+        for server in servers:
+            lines.append(str(server.name) + ':\n  File Count:   ' + str(filecounts[i]) + '\n  Image Files:  ' + str(imagefilecounts[i]) + '\n  Total Size:   ' + str(filesizes[i]) + '\n')
+            i += 1
+        pages = paginate_string(lines)
+        for page in pages:
+            await self.bot.say(page)
+            # This pause reduces the choppyness of the messages by going as fast as Discord allows but at regular intervals
+            time.sleep(1)
 
 def setup(bot):
     bot.add_cog(SCIENCE(bot))
