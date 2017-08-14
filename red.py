@@ -340,7 +340,9 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
     @bot.event
     async def on_command(command, ctx):
         bot.counter["processed_commands"] += 1
-        print('Command ' + colored('$' + str(command), 'yellow') + ' executed in channel ' + colored(str(ctx.message.server), 'green') + colored('#' + str(ctx.message.channel), 'blue'))
+        print(str(ctx))
+        print()
+        print('Command ' + colored('$' + str(command), 'yellow') + ' executed by ' + colored(str(ctx.message.author), 'cyan') + ' in channel ' + colored(str(ctx.message.server), 'green') + colored('#' + str(ctx.message.channel), 'blue'))
 
     @bot.event
     async def on_message(message):
