@@ -79,18 +79,18 @@ class SCIENCE:
 
     @_files.command(pass_context=True)
     @checks.serverowner_or_permissions(administrator=True)
-    async def list(self, ctx, server=None):
+    async def list(self, ctx, serverid=None):
         """List names of all logged file attachments for the specified server."""
-        if not server:
-            server = ctx.message.server.id
-            servername = ctx.message.server
-            await self.bot.say('These are all the logged attachments for ' + str(servername) + ' (Server ID: ' + str(server) + ')')
-        else:
-            await self.bot.say('These are all the logged attachments for ' + str(server))
+        if not serverid:
+            serverid = ctx.message.server.id
+        server = self.bot.get_server(serverid)
+        # print('Server: ' + str(server.name))
+        # print('Server ID: ' + str(server.id))
+        await self.bot.say('These are all the logged attachments for ' + str(server.name) + ' (Server ID: ' + str(server.id) + ')')
         B = ['.log', '.json']
         blacklist = re.compile('|'.join([re.escape(word) for word in B]))
         files_ = []
-        for path, subdirs, filelist in os.walk("/home/red/Red-DiscordBot/data/activitylogger/" + server):
+        for path, subdirs, filelist in os.walk("/home/red/Red-DiscordBot/data/activitylogger/" + str(server.id)):
             for file in filelist:
                 files_.append(str(file))
         ifiles = [word for word in files_ if not blacklist.search(word)]
