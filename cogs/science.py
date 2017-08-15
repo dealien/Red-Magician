@@ -80,7 +80,7 @@ class SCIENCE:
     #         await self.bot.say("Couldn't load amount of players. No one is playing this game anymore or there's an error.")
 
     @commands.group(name="file", pass_context=True)
-    async def _files(self, ctx):
+    async def _file(self, ctx):
         """Logged file operations"""
         if ctx.invoked_subcommand is None:
             await send_cmd_help(ctx)
@@ -127,6 +127,9 @@ class SCIENCE:
         B = ['.log', '.json']
         blacklist = re.compile('|'.join([re.escape(word) for word in B]))
 
+        totalfilecount = 0
+        totalimagefilecount = 0
+        totalfilesize = 0
         filecounts = []
         imagefilecounts = []
         filesizes = []
@@ -143,16 +146,20 @@ class SCIENCE:
                 for ext in imageextensions:
                     if filename.endswith(ext):
                         imagefiles.append(filename)
+            totalfilecount += len(files)
+            totalimagefilecount += len(imagefiles)
+            totalfilesize += get_size("/home/red/Red-DiscordBot/data/activitylogger/" + server.id)
             filecounts.append(str(len(files)))
             imagefilecounts.append(str(len(imagefiles)))
             filesizes.append(str(round(get_size("/home/red/Red-DiscordBot/data/activitylogger/" + server.id)/1000000, 3)) + ' MB')
 
         await self.bot.say('File Info:')
-        lines = ['File Info:']
+        lines = []
         i = 0
         for server in servers:
             lines.append(str(server.name) + ':\n  File Count:   ' + str(filecounts[i]) + '\n  Image Files:  ' + str(imagefilecounts[i]) + '\n  Total Size:   ' + str(filesizes[i]) + '\n')
             i += 1
+        lines.append('Total:\n  File Count:   ' + str(totalfilecount) + '\n  Image Files:  ' + str(totalimagefilecount) + '\n  Total Size:   ' + str(round(totalfilesize/1000000, 3)) + 'MB')
         pages = paginate_string(lines)
         for page in pages:
             await self.bot.say(page)
