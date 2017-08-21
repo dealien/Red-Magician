@@ -118,7 +118,9 @@ class SCIENCE:
     @_file.command(pass_context=True)
     @checks.serverowner_or_permissions(administrator=True)
     async def info(self, ctx, server_id_or_substring=0):
-        """Show info about logged file attachments. If no server is specified, info is given for all servers."""
+        """Show info about logged file attachments. 
+        If a server id or name substring is given, the result only includes information about the matching server(s). 
+        If no server is specified, info is given for all servers."""
         if server_id_or_substring == 0:
             servers = []
             for server in self.bot.servers:
