@@ -117,12 +117,22 @@ class SCIENCE:
 
     @_file.command(pass_context=True)
     @checks.serverowner_or_permissions(administrator=True)
-    async def info(self, ctx):
-        """Show info about logged file attachments for all servers."""
-        server = ctx.message.server.id
-        servers = []
-        for server in self.bot.servers:
-            servers.append(server)
+    async def info(self, ctx, server_id_or_substring=0):
+        """Show info about logged file attachments. If no server is specified, info is given for all servers."""
+        if server_id_or_substring == 0:
+            servers = []
+            for server in self.bot.servers:
+                servers.append(server)
+        else if type(server_id_or_substring) is string:
+            myservers = []
+            for server in self.bot.servers:
+                myservers.append(server)
+            servers = [server for server in myservers if server_id_or_substring in str(server)]
+        else if type(server_id_or_substring) is int and len(server_id_or_substring) is 18:
+            myservers = []
+            for server in self.bot.servers:
+                myservers.append(server)
+            servers = [server for server in myservers if server_id_or_substring in server.id]
         print(servers)
         B = ['.log', '.json']
         blacklist = re.compile('|'.join([re.escape(word) for word in B]))
