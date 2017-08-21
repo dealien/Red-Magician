@@ -134,8 +134,8 @@ class SCIENCE:
                 myservers.append(server)
             servers = [server for server in myservers if server_id_or_substring in server.id]
         else:
-        # await send_cmd_help(ctx)
-        await self.bot.say('Error: optional server argument must be either a partial name of a server or a server id.')
+            # await send_cmd_help(ctx)
+            await self.bot.say('Error: optional server argument must be either a partial name of a server or a server id.')
         print(servers)
         B = ['.log', '.json']
         blacklist = re.compile('|'.join([re.escape(word) for word in B]))
