@@ -123,12 +123,12 @@ class SCIENCE:
             servers = []
             for server in self.bot.servers:
                 servers.append(server)
-        else if type(server_id_or_substring) is string:
+        elif type(server_id_or_substring) is string:
             myservers = []
             for server in self.bot.servers:
                 myservers.append(server)
             servers = [server for server in myservers if server_id_or_substring in str(server)]
-        else if type(server_id_or_substring) is int and len(server_id_or_substring) is 18:
+        elif type(server_id_or_substring) is int and len(server_id_or_substring) is 18:
             myservers = []
             for server in self.bot.servers:
                 myservers.append(server)
