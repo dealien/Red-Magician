@@ -51,8 +51,8 @@ class Owner:
     def __unload(self):
         self.session.close()
 
-    @commands.command()
-    @checks.is_owner()
+    @commands.group(invoke_without_command=True)
+    @checks.is_owner()    
     async def load(self, *, cog_name: str):
         """Loads a cog
 
@@ -79,6 +79,29 @@ class Owner:
             set_cog(module, True)
             await self.disable_commands()
             await self.bot.say("The cog has been loaded.")
+
+    @load.command(name="all")
+    @checks.is_owner()
+    async def load_all(self):
+        """Loads all cogs"""
+        cogs = self._list_cogs()
+        still_unloaded = []
+        for cog in cogs:
+            set_cog(cog, False)
+            try:
+                self._load_cog(cog)
+            except OwnerLoadWithoutReloadError:
+                pass
+            except CogLoadError as e:
+                log.exception(e)
+                traceback.print_exc()
+                still_unloaded.append(cog)
+        if still_unloaded:
+            still_unloaded = ", ".join(still_unloaded)
+            await self.bot.say("I was unable to load some cogs: "
+                "{}".format(still_unloaded))
+        else:
+            await self.bot.say("All cogs are now loaded.")
 
     @commands.group(invoke_without_command=True)
     @checks.is_owner()
@@ -129,6 +152,7 @@ class Owner:
                 "{}".format(still_loaded))
         else:
             await self.bot.say("All cogs are now unloaded.")
+
 
     @checks.is_owner()
     @commands.command(name="reload")
