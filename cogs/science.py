@@ -88,7 +88,7 @@ class SCIENCE:
     @_file.command(pass_context=True)
     @checks.serverowner_or_permissions(administrator=True)
     async def list(self, ctx, serverid=None):
-        """List names of all logged file attachments for the specified server. Default is the current server if no other server is specified. """
+        """List names of all logged file attachments for the server specified by id. Default is the current server. """
         if not serverid:
             serverid = ctx.message.server.id
         server = self.bot.get_server(serverid)
