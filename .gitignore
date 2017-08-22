@@ -4,6 +4,7 @@ __pycache__
 data
 !data/trivia/*
 !data/audio/playlists/*
+!data/rpsls/weaknesses.json
 *.exe
 *.dll
 *.log
