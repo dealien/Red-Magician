@@ -333,7 +333,7 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
 
         print("Login successful. ({}ms)\n".format(login_time))
         mc.set("login_time", str(login_time))
-        print mc.get("login_time")
+        print(mc.get("login_time"))
 
         owner = await set_bot_owner()
 
