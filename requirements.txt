@@ -5,3 +5,8 @@ imgurpython
 termcolor
 beautifulsoup4
 datetime
+tabulate
+psutil
+browser_cookie3
+python-dateutil
+pillow
