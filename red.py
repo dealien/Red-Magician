@@ -549,28 +549,6 @@ def set_cog(cog, value):  # TODO: move this out of red.py
     dataIO.save_json("data/red/cogs.json", data)
 
 
-def _load_all(self):
-    cogs = self._list_cogs()
-    still_unloaded = []
-    not_to_load = ['cogs.audio', 'cogs.rpsls']
-    cogs = [x for x in cogs if str(x) not in not_to_load]
-    for cog in cogs:
-        print('Attempting to load cog: ' + cog)
-        set_cog(cog, False)
-        try:
-            self._load_cog(cog)
-        except CogLoadError as e:
-            log.exception(e)
-            traceback.print_exc()
-            still_unloaded.append(cog)
-    if still_unloaded:
-        still_unloaded = ", ".join(still_unloaded)
-        await self.bot.say("I was unable to load some cogs: "
-            "{}".format(still_unloaded))
-    else:
-        await self.bot.say("All cogs are now loaded.")
-
-
 def load_cogs(bot):
     defaults = ("alias", "audio", "customcom", "downloader", "economy",
                 "general", "image", "mod", "streams", "trivia")
@@ -617,10 +595,6 @@ def load_cogs(bot):
 
     if failed:
         print("\nFailed to load: {}\n".format(" ".join(failed)))
-    is_heroku = str(os.environ.get('IS_HEROKU'))
-    if is_heroku == 'True':
-        _load_all()
-
 
 
 def main(bot):
