@@ -406,22 +406,27 @@ def check_folders():
 
 
 def interactive_setup(settings):
-    first_run = settings.bot_settings == settings.default_settings
-
-    if first_run:
-        print("Red - First run configuration\n")
-        print("If you haven't already, create a new account:\n"
-              "https://twentysix26.github.io/Red-Docs/red_guide_bot_accounts/"
-              "#creating-a-new-bot-account")
-        print("and obtain your bot's token like described.")
-
-    if not settings.login_credentials:
-        if os.environ.get('IS_HEROKU') is True:
-            if len(str(os.token.get('BOT_TOKEN'))) >= 50:
-                settings.token = os.environ.get('BOT_TOKEN')
-            else:
-                print('Please provide a valid bot token as the Heroku environment variable "BOT_TOKEN"')
+    print('IS_HEROKU = ' + os.environ.get('IS_HEROKU', None))
+    if os.environ.get('IS_HEROKU', None):
+        if len(str(os.token.get('BOT_TOKEN'))) >= 50:
+            settings.token = os.environ.get('BOT_TOKEN')
         else:
+            print('Please provide a valid bot token as the Heroku environment variable "BOT_TOKEN"')
+        settings.prefixes = ['$']
+        settings.default_admin = 'Bot Commander'
+        settings.default_mod = 'Bot Moderator'
+        settings.save_settings()
+    else:
+        first_run = settings.bot_settings == settings.default_settings
+
+        if first_run:
+            print("Red - First run configuration\n")
+            print("If you haven't already, create a new account:\n"
+                  "https://twentysix26.github.io/Red-Docs/red_guide_bot_accounts/"
+                  "#creating-a-new-bot-account")
+            print("and obtain your bot's token like described.")
+
+        if not settings.login_credentials:
             print("\nInsert your bot's token:")
             while settings.token is None and settings.email is None:
                 choice = input("> ")
@@ -432,12 +437,9 @@ def interactive_setup(settings):
                     settings.password = input("\nPassword> ")
                 else:
                     print("That doesn't look like a valid token.")
-        settings.save_settings()
+            settings.save_settings()
 
-    if not settings.prefixes:
-        if os.environ.get('IS_HEROKU') is True:
-            settings.prefixes = ['$']
-        else:
+        if not settings.prefixes:
             print("\nChoose a prefix. A prefix is what you type before a command."
                   "\nA typical prefix would be the exclamation mark.\n"
                   "Can be multiple characters. You will be able to change it "
@@ -451,14 +453,9 @@ def interactive_setup(settings):
                           new_prefix))
                 confirmation = get_answer()
             settings.prefixes = [new_prefix]
-        settings.save_settings()
-
-    if first_run:
-        if os.environ.get('IS_HEROKU') is True:
-            settings.default_admin = 'Bot Commander'
-            settings.default_mod = 'Bot Moderator'
             settings.save_settings()
-        else:
+
+        if first_run:
             print("\nInput the admin role's name. Anyone with this role in Discord"
                   " will be able to use the bot's admin commands")
             print("Leave blank for default name (Transistor)")
