@@ -406,13 +406,14 @@ def check_folders():
 
 
 def interactive_setup(settings):
-    print('IS_HEROKU = ' + os.environ.get('IS_HEROKU', None))
-    if os.environ.get('IS_HEROKU', None):
+    is_heroku = str(os.environ.get('IS_HEROKU'))
+    print('IS_HEROKU = ' + is_heroku)
+    if is_heroku == 'True'
         if len(str(os.token.get('BOT_TOKEN'))) >= 50:
             settings.token = os.environ.get('BOT_TOKEN')
         else:
             print('Please provide a valid bot token as the Heroku environment variable "BOT_TOKEN"')
-        settings.prefixes = ['$']
+        settings.prefixes = ['$', '[p]']
         settings.default_admin = 'Bot Commander'
         settings.default_mod = 'Bot Moderator'
         settings.save_settings()
