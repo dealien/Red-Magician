@@ -90,7 +90,7 @@ class Owner:
         """Loads all cogs"""
         cogs = self._list_cogs()
         still_unloaded = []
-        cogs = [y for y in x if str(y) != 'cogs.audio']
+        cogs = [y for y in cogs if str(y) != 'cogs.audio']
         for cog in cogs:
             print('Attempting to load cog: ' + cog)
             set_cog(cog, False)
