@@ -45,10 +45,10 @@ is_heroku = str(os.environ.get('IS_HEROKU'))
 if is_heroku == 'True':
     servers = os.environ.get('MEMCACHIER_SERVERS', '').split(',')
     user = os.environ.get('MEMCACHIER_USERNAME', '')
-    pass = os.environ.get('MEMCACHIER_PASSWORD', '')
+    password = os.environ.get('MEMCACHIER_PASSWORD', '')
 
     mc = pylibmc.Client(servers, binary=True,
-                        username=user, password=pass,
+                        username=user, password=password,
                         behaviors={
                           # Faster IO
                           "tcp_nodelay": True,
