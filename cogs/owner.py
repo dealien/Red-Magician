@@ -92,6 +92,7 @@ class Owner:
         still_unloaded = []
         cogs = filter(lambda a: a != 'audio', cogs)
         for cog in cogs:
+            print('Attempting to load cog: ' + cog)
             set_cog(cog, False)
             try:
                 self._load_cog(cog)
