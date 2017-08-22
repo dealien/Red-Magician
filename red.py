@@ -43,9 +43,13 @@ description = "Red - A multifunction Discord bot by Twentysix"
 
 is_heroku = str(os.environ.get('IS_HEROKU'))
 if is_heroku == 'True':
+    print('MemCache settings:')
     servers = os.environ.get('MEMCACHIER_SERVERS', '').split(',')
     user = os.environ.get('MEMCACHIER_USERNAME', '')
     password = os.environ.get('MEMCACHIER_PASSWORD', '')
+    print('servers = ' + str(servers))
+    print('user = ' + str(user))
+    print('password = ' + str(password))
 
     mc = pylibmc.Client(servers, binary=True,
                         username=user, password=password,
