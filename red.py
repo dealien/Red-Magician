@@ -416,58 +416,72 @@ def interactive_setup(settings):
         print("and obtain your bot's token like described.")
 
     if not settings.login_credentials:
-        print("\nInsert your bot's token:")
-        while settings.token is None and settings.email is None:
-            choice = input("> ")
-            if "@" not in choice and len(choice) >= 50:  # Assuming token
-                settings.token = choice
-            elif "@" in choice:
-                settings.email = choice
-                settings.password = input("\nPassword> ")
+        if os.environ.get('IS_HEROKU') is True:
+            if len(str(os.token.get('BOT_TOKEN'))) >= 50:
+                settings.token = os.environ.get('BOT_TOKEN')
             else:
-                print("That doesn't look like a valid token.")
+                print('Please provide a valid bot token as the Heroku environment variable "BOT_TOKEN"')
+        else:
+            print("\nInsert your bot's token:")
+            while settings.token is None and settings.email is None:
+                choice = input("> ")
+                if "@" not in choice and len(choice) >= 50:  # Assuming token
+                    settings.token = choice
+                elif "@" in choice:
+                    settings.email = choice
+                    settings.password = input("\nPassword> ")
+                else:
+                    print("That doesn't look like a valid token.")
         settings.save_settings()
 
     if not settings.prefixes:
-        print("\nChoose a prefix. A prefix is what you type before a command."
-              "\nA typical prefix would be the exclamation mark.\n"
-              "Can be multiple characters. You will be able to change it "
-              "later and add more of them.\nChoose your prefix:")
-        confirmation = False
-        while confirmation is False:
-            new_prefix = ensure_reply("\nPrefix> ").strip()
-            print("\nAre you sure you want {0} as your prefix?\nYou "
-                  "will be able to issue commands like this: {0}help"
-                  "\nType yes to confirm or no to change it".format(
-                      new_prefix))
-            confirmation = get_answer()
-        settings.prefixes = [new_prefix]
+        if os.environ.get('IS_HEROKU') is True:
+            settings.prefixes = ['$']
+        else:
+            print("\nChoose a prefix. A prefix is what you type before a command."
+                  "\nA typical prefix would be the exclamation mark.\n"
+                  "Can be multiple characters. You will be able to change it "
+                  "later and add more of them.\nChoose your prefix:")
+            confirmation = False
+            while confirmation is False:
+                new_prefix = ensure_reply("\nPrefix> ").strip()
+                print("\nAre you sure you want {0} as your prefix?\nYou "
+                      "will be able to issue commands like this: {0}help"
+                      "\nType yes to confirm or no to change it".format(
+                          new_prefix))
+                confirmation = get_answer()
+            settings.prefixes = [new_prefix]
         settings.save_settings()
 
     if first_run:
-        print("\nInput the admin role's name. Anyone with this role in Discord"
-              " will be able to use the bot's admin commands")
-        print("Leave blank for default name (Transistor)")
-        settings.default_admin = input("\nAdmin role> ")
-        if settings.default_admin == "":
-            settings.default_admin = "Transistor"
-        settings.save_settings()
+        if os.environ.get('IS_HEROKU') is True:
+            settings.default_admin = 'Bot Commander'
+            settings.default_mod = 'Bot Moderator'
+            settings.save_settings()
+        else:
+            print("\nInput the admin role's name. Anyone with this role in Discord"
+                  " will be able to use the bot's admin commands")
+            print("Leave blank for default name (Transistor)")
+            settings.default_admin = input("\nAdmin role> ")
+            if settings.default_admin == "":
+                settings.default_admin = "Bot Commander"
+            settings.save_settings()
 
-        print("\nInput the moderator role's name. Anyone with this role in"
-              " Discord will be able to use the bot's mod commands")
-        print("Leave blank for default name (Process)")
-        settings.default_mod = input("\nModerator role> ")
-        if settings.default_mod == "":
-            settings.default_mod = "Process"
-        settings.save_settings()
+            print("\nInput the moderator role's name. Anyone with this role in"
+                  " Discord will be able to use the bot's mod commands")
+            print("Leave blank for default name (Process)")
+            settings.default_mod = input("\nModerator role> ")
+            if settings.default_mod == "":
+                settings.default_mod = "Bot Moderator"
+            settings.save_settings()
 
-        print("\nThe configuration is done. Leave this window always open to"
-              " keep Red online.\nAll commands will have to be issued through"
-              " Discord's chat, *this window will now be read only*.\n"
-              "Please read this guide for a good overview on how Red works:\n"
-              "https://twentysix26.github.io/Red-Docs/red_getting_started/\n"
-              "Press enter to continue")
-        input("\n")
+            print("\nThe configuration is done. Leave this window always open to"
+                  " keep Red online.\nAll commands will have to be issued through"
+                  " Discord's chat, *this window will now be read only*.\n"
+                  "Please read this guide for a good overview on how Red works:\n"
+                  "https://twentysix26.github.io/Red-Docs/red_getting_started/\n"
+                  "Press enter to continue")
+            input("\n")
 
 
 def set_logger(bot):
