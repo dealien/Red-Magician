@@ -10,3 +10,4 @@ psutil
 browser_cookie3
 python-dateutil
 pillow
+dota2py
