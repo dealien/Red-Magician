@@ -408,7 +408,7 @@ def check_folders():
 def interactive_setup(settings):
     is_heroku = str(os.environ.get('IS_HEROKU'))
     print('IS_HEROKU = ' + is_heroku)
-    if is_heroku == 'True'
+    if is_heroku == 'True':
         if len(str(os.token.get('BOT_TOKEN'))) >= 50:
             settings.token = os.environ.get('BOT_TOKEN')
         else:
