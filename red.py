@@ -286,6 +286,9 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
 
     @bot.event
     async def on_ready():
+        is_heroku = str(os.environ.get('IS_HEROKU'))
+        if is_heroku == 'True':
+            load_all()
         if bot._intro_displayed:
             return
         bot._intro_displayed = True
