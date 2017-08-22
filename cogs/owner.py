@@ -90,6 +90,7 @@ class Owner:
         """Loads all cogs"""
         cogs = self._list_cogs()
         still_unloaded = []
+        cogs = filter(lambda a: a != 'audio', cogs)
         for cog in cogs:
             set_cog(cog, False)
             try:
