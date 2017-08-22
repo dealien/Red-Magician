@@ -10,6 +10,7 @@ script:
 cache: pip
 notifications:
   email: false
+before_deploy: "heroku stop -a red-magician run"
 deploy:
   provider: heroku
   api_key:
