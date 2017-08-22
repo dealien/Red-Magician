@@ -14,7 +14,7 @@ deploy:
   provider: heroku
   api_key:
     secure: WbOg3O6FhHkVi5WclG6GXR4vk/OpzhNdXqtC13Wk5ZpK8xSfZROGJN12LZbkt6o1T2A0PCFQe6kaiUnb1gkKKU5dNTOCsDKaw1WdHZNG+gUMT+5LrHwRHhHe+RXMK9OyP1Htka1KdEHj4Rl72NdCoY75He98jwTYLglRXbcyLZZa/laLR0Eiq/15MRt5xq1O6HYM1b9z644CvBAZDkyaDlFWeVhGbg8Mk63ZwF2AqpYVcbsgCwkx9ZXIDDxqG1rifulDzt1gvLj6nKQYlVP08l8GCwg9q334973AOt2yfS5t8FaY/XkM0QRq25DKzREs99umRcCgecdHEhoOk7Dm5DcXd8GDNuKB7VCVRIathpkl9uMrRqVOVuIszrmNYHIIns1DdA+KLRVQjwDrUB4GjYIIynEJTBY/r0bfkUQ5XBw91UMtMsnTFGL2AsPcvqlmnUlotXKYFSeB7GeiUFuDC1SYVhjgP9q35NsgrHHWjxLHs+b/2TEM4IA+NAhlwHrKsOMYv1lDrETc1nHwCuNUQDBDSGoYk4aeWhfh2V+eZfs7c7fCYRhIXNt7VOy7ZqpAc+VCdeAuMSZm3dur4IhmKQqhBNU2blMemZHu97kLSW0JFm6TLXQvpiNERIToDajVPuI6dCgkj1Ag3DmuORQjRuvRjfL766Tc5rxS+aXdMPA=
-  app: red-magician
+  app: blue-magician
   on:
     repo: dealien/Red-Magician
   run: "python launcher.py --start --auto-restart"
