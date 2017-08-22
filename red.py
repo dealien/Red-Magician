@@ -414,7 +414,7 @@ def interactive_setup(settings):
             print('Bot token loaded')
         else:
             print('Please provide a valid bot token as the Heroku environment variable "BOT_TOKEN"')
-        settings.prefixes = ['$', '[p]']
+        settings.prefixes = [os.environ.get('PREFIX')]
         settings.default_admin = 'Bot Commander'
         settings.default_mod = 'Bot Moderator'
         settings.save_settings()
