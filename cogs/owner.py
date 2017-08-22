@@ -96,8 +96,6 @@ class Owner:
             set_cog(cog, False)
             try:
                 self._load_cog(cog)
-            except OwnerLoadWithoutReloadError:
-                pass
             except CogLoadError as e:
                 log.exception(e)
                 traceback.print_exc()
