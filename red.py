@@ -1,3 +1,4 @@
+import pylibmc
 import asyncio
 import os
 import sys
@@ -40,6 +41,33 @@ from io import TextIOWrapper
 
 description = "Red - A multifunction Discord bot by Twentysix"
 
+is_heroku = str(os.environ.get('IS_HEROKU'))
+if is_heroku == 'True':
+    servers = os.environ.get('MEMCACHIER_SERVERS', '').split(',')
+    user = os.environ.get('MEMCACHIER_USERNAME', '')
+    pass = os.environ.get('MEMCACHIER_PASSWORD', '')
+
+    mc = pylibmc.Client(servers, binary=True,
+                        username=user, password=pass,
+                        behaviors={
+                          # Faster IO
+                          "tcp_nodelay": True,
+
+                          # Keep connection alive
+                          'tcp_keepalive': True,
+
+                          # Timeout for set/get requests
+                          'connect_timeout': 2000, # ms
+                          'send_timeout': 750 * 1000, # us
+                          'receive_timeout': 750 * 1000, # us
+                          '_poll_timeout': 2000, # ms
+
+                          # Better failover
+                          'ketama': True,
+                          'remove_failed': 1,
+                          'retry_timeout': 2,
+                          'dead_timeout': 30,
+                        })
 
 class Bot(commands.Bot):
     def __init__(self, *args, **kwargs):
@@ -300,6 +328,8 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
         login_time = login_time.seconds + login_time.microseconds/1E6
 
         print("Login successful. ({}ms)\n".format(login_time))
+        mc.set("login_time", str(login_time))
+        print mc.get("login_time")
 
         owner = await set_bot_owner()
 
@@ -414,10 +444,11 @@ def interactive_setup(settings):
             print('Bot token loaded')
         else:
             print('Please provide a valid bot token as the Heroku environment variable "BOT_TOKEN"')
-        settings.prefixes = [os.environ.get('PREFIX')]
+        settings.prefixes = os.environ.get('PREFIX').split(',')
         settings.default_admin = 'Bot Commander'
         settings.default_mod = 'Bot Moderator'
         settings.save_settings()
+
     else:
         first_run = settings.bot_settings == settings.default_settings
 
@@ -552,7 +583,6 @@ def set_cog(cog, value):  # TODO: move this out of red.py
 def load_cogs(bot):
     defaults = ("alias", "audio", "customcom", "downloader", "economy",
                 "general", "image", "mod", "streams", "trivia", "science")
-
     try:
         registry = dataIO.load_json("data/red/cogs.json")
     except:
