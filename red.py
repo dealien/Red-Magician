@@ -409,8 +409,8 @@ def interactive_setup(settings):
     is_heroku = str(os.environ.get('IS_HEROKU'))
     print('IS_HEROKU = ' + is_heroku)
     if is_heroku == 'True':
-        if len(str(os.token.get('BOT_TOKEN'))) >= 50:
-            settings.token = os.environ.get('BOT_TOKEN')
+        if len(str(os.environ.get('BOT_TOKEN'))) >= 50:
+            settings.token = str(os.environ.get('BOT_TOKEN'))
         else:
             print('Please provide a valid bot token as the Heroku environment variable "BOT_TOKEN"')
         settings.prefixes = ['$', '[p]']
