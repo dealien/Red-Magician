@@ -549,12 +549,10 @@ def set_cog(cog, value):  # TODO: move this out of red.py
     dataIO.save_json("data/red/cogs.json", data)
 
 
-def load_cogs(bot, self):
-    if str(os.environ.get('IS_HEROKU')) == 'True':
-        defaults = [c.split(".")[1] for c in self._list_cogs()
-                    if c.split(".")[1] not in loaded]
-    else:
-        defaults = ("alias", "audio", "customcom", "downloader", "economy", "general", "image", "mod", "streams", "trivia")
+def load_cogs(bot):
+    defaults = ("alias", "audio", "customcom", "downloader", "economy",
+                "general", "image", "mod", "streams", "trivia")
+
     try:
         registry = dataIO.load_json("data/red/cogs.json")
     except:
