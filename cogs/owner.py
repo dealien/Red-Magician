@@ -26,6 +26,10 @@ class CogLoadError(Exception):
     pass
 
 
+class OwnerLoadWithoutReloadError(CogLoadError):
+    pass
+
+
 class NoSetupError(CogLoadError):
     pass
 
