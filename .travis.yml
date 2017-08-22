@@ -17,3 +17,4 @@ deploy:
   app: blue-magician
   on:
     repo: dealien/Red-Magician
+  run: "python launcher.py --start --auto-restart"
