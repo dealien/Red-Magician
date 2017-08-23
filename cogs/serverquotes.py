@@ -8,6 +8,7 @@ import os
 from random import choice as randchoice
 import json
 import requests
+import ast
 
 
 try:
@@ -128,7 +129,7 @@ class ServerQuotes:
         print('myjson_url = ' + str(myjson_url))
         if myjson_url is None:
             myjson_url = os.environ.get('JSON_URL')
-        print('Myjson URL: ' + myjson_url)
+        print('myjson_url = ' + myjson_url)
         sid = ctx.message.server.id
         aid = ctx.message.author.id
         if sid not in self.quotes:
