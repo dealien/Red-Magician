@@ -865,9 +865,9 @@ class Owner:
     @commands.command()
     async def info(self):
         """Shows info about Red"""
-        author_repo = "https://github.com/Twentysix26"
-        red_repo = author_repo + "/Red-DiscordBot"
-        server_url = "https://discord.gg/red"
+        author_repo = "https://github.com/dealien"
+        red_repo = author_repo + "/Red-Magician"
+        server_url = "https://discord.gg/SN4TvHJ"
         dpy_repo = "https://github.com/Rapptz/discord.py"
         python_url = "https://www.python.org/"
         since = datetime.datetime(2016, 1, 2, 0, 0)
@@ -889,11 +889,9 @@ class Owner:
             owner = "Unknown"
 
         about = (
-            "This is an instance of [Red, an open source Discord bot]({}) "
-            "created by [Twentysix]({}) and improved by many.\n\n"
-            "Red is backed by a passionate community who contributes and "
-            "creates content for everyone to enjoy. [Join us today]({}) "
-            "and help us improve!\n\n"
+            "This is an instance of [Red Magician, an open source Discord bot]({}) "
+            "created by [VyrenGames]({}).\n\n"
+            "If you have questions, you can contact VyrenGames here: {}\n\n"
             "".format(red_repo, author_repo, server_url))
 
         embed = discord.Embed(colour=discord.Colour.red())
