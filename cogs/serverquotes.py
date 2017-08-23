@@ -51,22 +51,29 @@ NN17LtHkqmk4hU=OkkFvlkfXbF<@GE1=#G!0eUc_U?_|ci*hY`#&-hR~Ho%GGz%*gP!w+$q;o_9f8~i9
 
 __version__ = '1.5.2'
 
-if os.environ.get('IS_HEROKU') == 'True':
-    quote_file = '.data/serverquotes/quotes.json'
-    print('Loading quotes from Myjson...')
-    resp = requests.get(os.environ.get('JSON_URL'))
-    data = json.loads(resp.text)
-    with open(quote_file, 'w+') as outfile:
-        json.dump(data, outfile)
-    print('Quotes saved to ' + quote_file)
+# if os.environ.get('IS_HEROKU') == 'True':
+#     quote_file = '.data/serverquotes/quotes.json'
+#     print('Loading quotes from Myjson...')
+#     resp = requests.get(os.environ.get('JSON_URL'))
+#     data = json.loads(resp.text)
+#     with open(quote_file, 'w+') as outfile:
+#         json.dump(data, outfile)
+#     print('Quotes saved to ' + quote_file)
 
 class ServerQuotes:
 
     def __init__(self, bot):
         self.bot = bot
-        self.quotes = dataIO.load_json(JSON)
         self.analytics = CogAnalytics(self)
-        print('Quotes loaded from ' + JSON)
+        if os.environ.get('IS_HEROKU') == 'True':
+            print('Loading quotes from Myjson...')
+            resp = requests.get(os.environ.get('JSON_URL'))
+            data = json.loads(resp.text)
+            self.quotes = data
+            print('Quotes loaded from Myjson')
+        else:
+            self.quotes = dataIO.load_json(JSON)
+            print('Quotes loaded from ' + JSON)
 
     def _get_random_quote(self, ctx):
         sid = ctx.message.server.id
