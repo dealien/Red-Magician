@@ -92,7 +92,7 @@ class ServerQuotes:
             print('myjson_url = ' + str(myjson_url))
             if myjson_url is None:
                 myjson_url = os.environ.get('JSON_URL')
-            print('Myjson URL: ' + myjson_url)
+            print('myjson_url = ' + myjson_url)
             resp = requests.get(myjson_url)
             data = json.loads(resp.text)
             self.quotes = data
@@ -125,11 +125,6 @@ class ServerQuotes:
         return randchoice(quotes)
 
     def _add_quote(self, ctx, author, message):
-        myjson_url = mc.get('json_url')
-        print('myjson_url = ' + str(myjson_url))
-        if myjson_url is None:
-            myjson_url = os.environ.get('JSON_URL')
-        print('myjson_url = ' + myjson_url)
         sid = ctx.message.server.id
         aid = ctx.message.author.id
         if sid not in self.quotes:
@@ -151,13 +146,11 @@ class ServerQuotes:
 
         self.quotes[sid].append(quote)
         dataIO.save_json(JSON, self.quotes)
-        r = requests.post(myjson_url, json=self.quotes)
-        print('Data posted to ' + myjson_url)
+        r = requests.post('https://api.myjson.com/bins', json=self.quotes)
         print(r)
         print('Quotes saved to Myjson')
         print('New Myjson URL: ' + ast.literal_eval(r.text)['uri'])
         mc.set('json_url', ast.literal_eval(r.text)['uri'])
-        myjson_url = ast.literal_eval(r.text)['uri']
         print('New Myjson URL saved to MemCache')
 
     def _quote_author(self, ctx, quote):
