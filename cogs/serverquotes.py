@@ -62,6 +62,7 @@ class ServerQuotes:
 
     def __init__(self, bot):
         self.bot = bot
+        print('Loading quote list from ' + JSON)
         self.quotes = dataIO.load_json(JSON)
         self.analytics = CogAnalytics(self)
 
