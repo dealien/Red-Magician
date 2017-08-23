@@ -438,9 +438,8 @@ def check_folders():
 
 
 def interactive_setup(settings):
-    is_heroku = str(os.environ.get('IS_HEROKU'))
-    print('IS_HEROKU = ' + is_heroku)
-    if is_heroku == 'True':
+    print('IS_HEROKU = ' + str(os.environ.get('IS_HEROKU')))
+    if str(os.environ.get('IS_HEROKU')) == 'True':
         if len(str(os.environ.get('BOT_TOKEN'))) >= 50:
             settings.token = str(os.environ.get('BOT_TOKEN'))
             print('Bot token loaded')
@@ -583,8 +582,10 @@ def set_cog(cog, value):  # TODO: move this out of red.py
 
 
 def load_cogs(bot):
-    defaults = ("alias", "audio", "customcom", "downloader", "economy",
-                "general", "image", "mod", "streams", "trivia", "science")
+    if str(os.environ.get('IS_HEROKU')) == 'True':
+        defaults = ("alias", "audio", "customcom", "downloader", "economy", "general", "image", "mod", "streams", "trivia", "science", "")
+    else:
+        defaults = ("alias", "audio", "customcom", "downloader", "economy", "general", "image", "mod", "streams", "trivia")
     try:
         registry = dataIO.load_json("data/red/cogs.json")
     except:
