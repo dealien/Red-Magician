@@ -71,6 +71,7 @@ class ServerQuotes:
             data = json.loads(resp.text)
             self.quotes = data
             print('Quotes loaded from Myjson')
+            print(self.quotes)
         else:
             self.quotes = dataIO.load_json(JSON)
             print('Quotes loaded from ' + JSON)
