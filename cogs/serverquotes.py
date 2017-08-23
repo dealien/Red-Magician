@@ -80,12 +80,6 @@ if os.environ.get('IS_HEROKU') == 'True':
                           'dead_timeout': 30,
                         })
 
-myjson_url = mc.get('json_url')
-print('myjson_url = ' + str(myjson_url))
-if myjson_url is None:
-    myjson_url = os.environ.get('JSON_URL')
-print('Myjson URL: ' + myjson_url)
-
 
 class ServerQuotes:
 
@@ -130,6 +124,11 @@ class ServerQuotes:
         return randchoice(quotes)
 
     def _add_quote(self, ctx, author, message):
+        myjson_url = mc.get('json_url')
+        print('myjson_url = ' + str(myjson_url))
+        if myjson_url is None:
+            myjson_url = os.environ.get('JSON_URL')
+        print('Myjson URL: ' + myjson_url)
         sid = ctx.message.server.id
         aid = ctx.message.author.id
         if sid not in self.quotes:
@@ -151,8 +150,8 @@ class ServerQuotes:
 
         self.quotes[sid].append(quote)
         dataIO.save_json(JSON, self.quotes)
-        print('Posting data to ' + myjson_url)
         r = requests.post(myjson_url, json=self.quotes)
+        print('Data posted to ' + myjson_url)
         print(r)
         print('Quotes saved to Myjson')
         print('New Myjson URL: ' + ast.literal_eval(r.text)['uri'])
