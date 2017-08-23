@@ -120,7 +120,7 @@ class ServerQuotes:
 
         self.quotes[sid].append(quote)
         dataIO.save_json(JSON, self.quotes)
-        r = requests.post(os.environ.get('JSON_URL'), data=self.quotes)
+        r = requests.post(os.environ.get('JSON_URL'), json=self.quotes)
         print(r)
         print('Quotes saved to Myjson')
 
