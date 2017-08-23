@@ -119,7 +119,6 @@ class ServerQuotes:
                  'text': escape_mass_mentions(message)}
 
         self.quotes[sid].append(quote)
-        print('self.quotes =\n' + self.quotes)
         dataIO.save_json(JSON, self.quotes)
         # r = requests.post(os.environ.get('JSON_URL'), data=self.quotes)
         # print('Data saved to Myjson:\n' + r)
