@@ -27,10 +27,10 @@ from collections import Counter
 from io import TextIOWrapper
 
 #
-# Red Magician, a Discord bot by VyrenGames, built off of Red Discord Bot
-#        by Twentysix, discord.py, and its command extension.
+# Red, a Discord bot by Twentysix, based on discord.py and its command
+#                             extension.
 #
-#                   https://github.com/VyrenGames/
+#                   https://github.com/Twentysix26/
 #
 #
 # red.py and cogs/utils/checks.py both contain some modified functions
@@ -39,7 +39,7 @@ from io import TextIOWrapper
 #                 https://github.com/Rapptz/RoboDanny/
 #
 
-description = "Red Magician - A multifunction Discord bot by VyrenGames"
+description = "Red - A multifunction Discord bot by Twentysix"
 
 if os.environ.get('IS_HEROKU') == 'True':
     servers = os.environ.get('MEMCACHIER_SERVERS', '').split(',')
@@ -331,9 +331,9 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
 
         owner = await set_bot_owner()
 
-        print("--------------------------")
-        print("Red Magician - Discord Bot")
-        print("--------------------------")
+        print("-----------------")
+        print("Red - Discord Bot")
+        print("-----------------")
         print(str(bot.user))
         print("\nConnected to:")
         print("{} servers".format(servers))
@@ -346,7 +346,7 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
         print("Owner: " + str(owner))
         print("{}/{} active cogs with {} commands".format(
             len(bot.cogs), total_cogs, len(bot.commands)))
-        print("--------------------------")
+        print("-----------------")
 
         if bot.settings.token and not bot.settings.self_bot:
             print("\nUse this url to bring your bot to a server:")
@@ -354,7 +354,7 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
             bot.oauth_url = url
             print(url)
 
-        print("\nVyrenGames's Server: https://discord.gg/SN4TvHJ")
+        print("\nOfficial server: https://discord.gg/red")
 
         print("Make sure to keep your bot updated. Select the 'Update' "
               "option from the launcher.")
@@ -450,7 +450,7 @@ def interactive_setup(settings):
         first_run = settings.bot_settings == settings.default_settings
 
         if first_run:
-            print("Red Magician - First run configuration\n")
+            print("Red - First run configuration\n")
             print("If you haven't already, create a new account:\n"
                   "https://twentysix26.github.io/Red-Docs/red_guide_bot_accounts/"
                   "#creating-a-new-bot-account")
@@ -591,7 +591,7 @@ def load_cogs(bot):
     owner_cog = bot.get_cog('Owner')
     if owner_cog is None:
         print("The owner cog is missing. It contains core functions without "
-              "which Red Magician cannot function. Reinstall.")
+              "which Red cannot function. Reinstall.")
         exit(1)
 
     if bot.settings._no_cogs:
