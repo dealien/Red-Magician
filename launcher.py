@@ -28,9 +28,9 @@ REQS_TXT = "requirements.txt"
 REQS_NO_AUDIO_TXT = "requirements_no_audio.txt"
 FFMPEG_BUILDS_URL = "https://ffmpeg.zeranoe.com/builds/"
 
-INTRO = ("==========================\n"
-         "Red Discord Bot - Launcher\n"
-         "==========================\n")
+INTRO = ("=======================\n"
+         "Red Magician - Launcher\n"
+         "=======================\n")
 
 IS_WINDOWS = os.name == "nt"
 IS_MAC = sys.platform == "darwin"
@@ -46,7 +46,7 @@ FFMPEG_FILES = {
 
 
 def parse_cli_arguments():
-    parser = argparse.ArgumentParser(description="Red - Discord Bot's launcher")
+    parser = argparse.ArgumentParser(description="Red Magician's launcher")
     parser.add_argument("--start", "-s",
                         help="Starts Red",
                         action="store_true")
@@ -175,7 +175,7 @@ def reset_red(reqs=False, data=False, cogs=False, git_reset=False):
 
 def download_ffmpeg(bitness):
     clear_screen()
-    repo = "https://github.com/Twentysix26/Red-DiscordBot/raw/master/"
+    repo = "https://github.com/dealien/Red-Magician/raw/master/"
     verified = []
 
     if bitness == "32bit":
@@ -498,7 +498,7 @@ def main():
     has_git = is_git_installed()
     is_git_installation = os.path.isdir(".git")
     if IS_WINDOWS:
-        os.system("TITLE Red Discord Bot - Launcher")
+        os.system("TITLE Red Magician - Launcher")
     clear_screen()
 
     try:
