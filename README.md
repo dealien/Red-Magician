@@ -1,6 +1,3 @@
-
-![intro](http://i.imgur.com/RgGlNpQ.jpg)
-
 # Red Magician - A fully customizable Discord bot
 #### *Music, admin, trivia, fun commands and much more!*
 [<img src="https://img.shields.io/badge/discord-py-blue.svg">](https://github.com/Rapptz/discord.py) 
