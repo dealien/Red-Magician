@@ -88,6 +88,8 @@ class ServerQuotes:
         if os.environ.get('IS_HEROKU') == 'True':
             print('Loading quotes from Myjson...')
             memcache_url = mc.get('memcache_url')
+            if not memcache_url:
+                memcache_url = os.environ.get('JSON_URL')
             print('Myjson URL: ' + memcache_url)
             resp = requests.get(memcache_url)
             data = json.loads(resp.text)
