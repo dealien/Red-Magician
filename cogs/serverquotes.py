@@ -121,6 +121,7 @@ class ServerQuotes:
         self.quotes[sid].append(quote)
         dataIO.save_json(JSON, self.quotes)
         r = requests.post(os.environ.get('JSON_URL'), data=self.quotes)
+        print(r)
         print('Quotes saved to Myjson')
 
     def _quote_author(self, ctx, quote):
