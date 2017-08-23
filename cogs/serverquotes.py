@@ -52,7 +52,6 @@ NN17LtHkqmk4hU=OkkFvlkfXbF<@GE1=#G!0eUc_U?_|ci*hY`#&-hR~Ho%GGz%*gP!w+$q;o_9f8~i9
 __version__ = '1.5.2'
 
 if os.environ.get('IS_HEROKU') == 'True':
-
     print('Loading quotes from Myjson...')
     resp = requests.get(os.environ.get('JSON_URL'))
     data = json.loads(resp.text)
