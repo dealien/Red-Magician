@@ -56,15 +56,15 @@ if os.environ.get('IS_HEROKU') == 'True':
     resp = requests.get(os.environ.get('JSON_URL'))
     data = json.loads(resp.text)
     dataIO.save_json(JSON, data)
-    print('Quotes loaded.')
+    print('Quotes saved to ' + JSON)
 
 class ServerQuotes:
 
     def __init__(self, bot):
         self.bot = bot
-        print('Loading quote list from ' + JSON)
         self.quotes = dataIO.load_json(JSON)
         self.analytics = CogAnalytics(self)
+        print('Quotes loaded from ' + JSON)
 
     def _get_random_quote(self, ctx):
         sid = ctx.message.server.id
