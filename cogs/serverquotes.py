@@ -55,6 +55,7 @@ if os.environ.get('IS_HEROKU') == 'True':
     print('Loading quotes from Myjson...')
     resp = requests.get(os.environ.get('JSON_URL'))
     data = json.loads(resp.text)
+    print(data)
     dataIO.save_json(JSON, data)
     print('Quotes saved to ' + JSON)
 
