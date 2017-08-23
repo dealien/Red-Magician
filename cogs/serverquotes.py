@@ -5,6 +5,8 @@ from .utils import checks
 from .utils.chat_formatting import escape_mass_mentions, pagify
 import os
 from random import choice as randchoice
+import json
+import requests
 
 
 try:
@@ -49,6 +51,12 @@ NN17LtHkqmk4hU=OkkFvlkfXbF<@GE1=#G!0eUc_U?_|ci*hY`#&-hR~Ho%GGz%*gP!w+$q;o_9f8~i9
 
 __version__ = '1.5.2'
 
+if os.environ.get('IS_HEROKU') == 'True':
+    print('Loading quotes from Myjson...')
+    resp = requests.get(os.environ.get('JSON_URL'))
+    data = json.loads(resp.text)
+    dataIO.save_json(JSON, data)
+    print('Quotes loaded.')
 
 class ServerQuotes:
 
@@ -101,7 +109,10 @@ class ServerQuotes:
                  'text': escape_mass_mentions(message)}
 
         self.quotes[sid].append(quote)
+        print('self.quotes =\n' + self.quotes)
         dataIO.save_json(JSON, self.quotes)
+        # r = requests.post(os.environ.get('JSON_URL'), data=self.quotes)
+        # print('Data saved to Myjson:\n' + r)
 
     def _quote_author(self, ctx, quote):
         if quote['author_id']:
