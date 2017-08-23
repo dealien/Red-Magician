@@ -87,11 +87,11 @@ class ServerQuotes:
         self.analytics = CogAnalytics(self)
         if os.environ.get('IS_HEROKU') == 'True':
             print('Loading quotes from Myjson...')
-            memcache_url = mc.get('memcache_url')
-            if not memcache_url:
-                memcache_url = os.environ.get('JSON_URL')
-            print('Myjson URL: ' + memcache_url)
-            resp = requests.get(memcache_url)
+            myjson_url = mc.get('json_url')
+            if not myjson_url:
+                myjson_url = os.environ.get('JSON_URL')
+            print('Myjson URL: ' + myjson_url)
+            resp = requests.get(myjson_url)
             data = json.loads(resp.text)
             self.quotes = data
             print('Quotes loaded from Myjson')
@@ -144,12 +144,13 @@ class ServerQuotes:
 
         self.quotes[sid].append(quote)
         dataIO.save_json(JSON, self.quotes)
-        print('Posting data to ' + memcache_url)
-        r = requests.post(memcache_url, json=self.quotes)
+        print('Posting data to ' + myjson_url)
+        r = requests.post(myjson_url, json=self.quotes)
         print(r)
         print('Quotes saved to Myjson')
         print('New Myjson URL: ' + ast.literal_eval(r.text)['uri'])
-        mc.set('memcache_url', ast.literal_eval(r.text)['uri'])
+        mc.set('json_url', ast.literal_eval(r.text)['uri'])
+        myjson_url = 
         print('New Myjson URL saved to MemCache')
 
     def _quote_author(self, ctx, quote):
