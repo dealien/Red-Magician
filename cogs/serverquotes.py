@@ -87,11 +87,11 @@ class ServerQuotes:
         self.bot = bot
         self.analytics = CogAnalytics(self)
         if os.environ.get('IS_HEROKU') == 'True':
-            # myjson_url = mc.get('json_url')
-            # print('myjson_url = ' + str(myjson_url))
-            # if myjson_url is None:
-            #     myjson_url = os.environ.get('JSON_URL')
-            # print('Myjson URL: ' + myjson_url)
+            myjson_url = mc.get('json_url')
+            print('myjson_url = ' + str(myjson_url))
+            if myjson_url is None:
+                myjson_url = os.environ.get('JSON_URL')
+            print('Myjson URL: ' + myjson_url)
             resp = requests.get(myjson_url)
             data = json.loads(resp.text)
             self.quotes = data
