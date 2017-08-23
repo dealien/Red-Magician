@@ -141,10 +141,12 @@ class ServerQuotes:
 
         self.quotes[sid].append(quote)
         dataIO.save_json(JSON, self.quotes)
+        print('Posting data to ' + memcache_url)
         r = requests.post(memcache_url, json=self.quotes)
         print(r)
         print('Quotes saved to Myjson')
-        mc.add('memcache_url', ast.literal_eval(p.text)['uri'])
+        print('New Myjson URL: ' + ast.literal_eval(r.text)['uri'])
+        mc.add('memcache_url', ast.literal_eval(r.text)['uri'])
         print('New Myjson URL saved to MemCache')
 
     def _quote_author(self, ctx, quote):
