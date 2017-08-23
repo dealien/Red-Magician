@@ -87,7 +87,7 @@ class ServerQuotes:
         self.analytics = CogAnalytics(self)
         if os.environ.get('IS_HEROKU') == 'True':
             print('Loading quotes from Myjson...')
-            memcache_url = mc.get(memcache_url)
+            memcache_url = mc.get('memcache_url')
             print('Myjson URL: ' + memcache_url)
             resp = requests.get(memcache_url)
             data = json.loads(resp.text)
@@ -147,7 +147,7 @@ class ServerQuotes:
         print(r)
         print('Quotes saved to Myjson')
         print('New Myjson URL: ' + ast.literal_eval(r.text)['uri'])
-        mc.add('memcache_url', ast.literal_eval(r.text)['uri'])
+        mc.set('memcache_url', ast.literal_eval(r.text)['uri'])
         print('New Myjson URL saved to MemCache')
 
     def _quote_author(self, ctx, quote):
