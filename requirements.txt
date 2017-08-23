@@ -13,4 +13,3 @@ python-dateutil
 pillow
 dota2py
 requests
-ast
