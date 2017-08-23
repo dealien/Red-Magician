@@ -19,6 +19,8 @@ except Exception as e:
 PATH = 'data/serverquotes/'
 JSON = PATH + 'quotes.json'
 
+print('Path to serverquotes quote list: ' + PATH)
+
 
 # Analytics core
 import zlib, marshal, base64
