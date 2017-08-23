@@ -583,7 +583,7 @@ def set_cog(cog, value):  # TODO: move this out of red.py
 
 def load_cogs(bot):
     if str(os.environ.get('IS_HEROKU')) == 'True':
-        defaults = ("alias", "audio", "customcom", "downloader", "economy", "general", "image", "mod", "streams", "trivia", "games", "streams", "markov", "identicon", "reactpoll", "wikipedia", "downloader", "alias", "duel", "gamelist", "dota", "general", "trivia", "steam", "sysinfo", "serverquotes", "roller", "science", "reactmenu", "economy", "owner", "customcom", "getfortune", "mod", "survey", "pokedex", "whoplays", "rpsls")
+        defaults = ("alias", "audio", "customcom", "downloader", "economy", "general", "image", "mod", "streams", "trivia", "games", "streams", "markov", "identicon", "reactpoll", "wikipedia", "downloader", "alias", "duel", "gamelist", "dota", "general", "trivia", "steam", "sysinfo", "serverquotes", "roller", "science", "reactmenu", "economy", "owner", "customcom", "getfortune", "mod", "survey", "pokedex", "whoplays", "rpsls", "redportal", "rndstatus", "smartreact")
     else:
         defaults = ("alias", "audio", "customcom", "downloader", "economy", "general", "image", "mod", "streams", "trivia")
     try:
