@@ -51,6 +51,34 @@ NN17LtHkqmk4hU=OkkFvlkfXbF<@GE1=#G!0eUc_U?_|ci*hY`#&-hR~Ho%GGz%*gP!w+$q;o_9f8~i9
 
 __version__ = '1.5.2'
 
+if os.environ.get('IS_HEROKU') == 'True':
+    servers = os.environ.get('MEMCACHIER_SERVERS', '').split(',')
+    user = os.environ.get('MEMCACHIER_USERNAME', '')
+    password = os.environ.get('MEMCACHIER_PASSWORD', '')
+    print('MemCache settings loaded')
+
+    mc = pylibmc.Client(servers, binary=True,
+                        username=user, password=password,
+                        behaviors={
+                          # Faster IO
+                          "tcp_nodelay": True,
+
+                          # Keep connection alive
+                          'tcp_keepalive': True,
+
+                          # Timeout for set/get requests
+                          'connect_timeout': 2000, # ms
+                          'send_timeout': 750 * 1000, # us
+                          'receive_timeout': 750 * 1000, # us
+                          '_poll_timeout': 2000, # ms
+
+                          # Better failover
+                          'ketama': True,
+                          'remove_failed': 1,
+                          'retry_timeout': 2,
+                          'dead_timeout': 30,
+                        })
+
 class ServerQuotes:
 
     def __init__(self, bot):
@@ -58,8 +86,9 @@ class ServerQuotes:
         self.analytics = CogAnalytics(self)
         if os.environ.get('IS_HEROKU') == 'True':
             print('Loading quotes from Myjson...')
-            print('Myjson URL: ' + os.environ.get('JSON_URL'))
-            resp = requests.get(os.environ.get('JSON_URL'))
+            memcache_url = mc.get(memcache_url)
+            print('Myjson URL: ' + memcache_url)
+            resp = requests.get(memcache_url)
             data = json.loads(resp.text)
             self.quotes = data
             print('Quotes loaded from Myjson')
@@ -112,9 +141,11 @@ class ServerQuotes:
 
         self.quotes[sid].append(quote)
         dataIO.save_json(JSON, self.quotes)
-        r = requests.post(os.environ.get('JSON_URL'), json=self.quotes)
+        r = requests.post(memcache_url, json=self.quotes)
         print(r)
         print('Quotes saved to Myjson')
+        mc.add('memcache_url', ast.literal_eval(p.text)['uri'])
+        print('New Myjson URL saved to MemCache')
 
     def _quote_author(self, ctx, quote):
         if quote['author_id']:

@@ -25,6 +25,7 @@ from cogs.utils.dataIO import dataIO
 from cogs.utils.chat_formatting import inline
 from collections import Counter
 from io import TextIOWrapper
+import memcache
 
 #
 # Red, a Discord bot by Twentysix, based on discord.py and its command
@@ -41,8 +42,7 @@ from io import TextIOWrapper
 
 description = "Red - A multifunction Discord bot by Twentysix"
 
-is_heroku = str(os.environ.get('IS_HEROKU'))
-if is_heroku == 'True':
+if os.environ.get('IS_HEROKU') == 'True':
     servers = os.environ.get('MEMCACHIER_SERVERS', '').split(',')
     user = os.environ.get('MEMCACHIER_USERNAME', '')
     password = os.environ.get('MEMCACHIER_PASSWORD', '')
