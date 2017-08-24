@@ -14,14 +14,6 @@ import re
 import os
 from datetime import datetime, timedelta
 
-try: # Check if BeautifulSoup4 is installed
-    from bs4 import BeautifulSoup
-    soupAvailable = True
-except:
-    soupAvailable = False
-import aiohttp
-import browser_cookie3
-
 
 def paginate_string(content):
     page = '```'
@@ -39,27 +31,12 @@ def paginate_string(content):
 def get_size(start_path = '.'):
     return sum(os.path.getsize(os.path.join(dirpath,filename)) for dirpath, dirnames, filenames in os.walk(start_path) for filename in filenames)
 
-class Science:
+class File:
     """A custom cog that does stuff! Lots of stuff!"""
 
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(pass_context=True)
-    async def test(self, ctx):
-        server = ctx.message.server
-        servers = []
-        for server in self.bot.servers:
-            servers.append(server.name)
-            print(str(server))
-
-    @commands.command()
-    async def punch(self, user : discord.Member):
-        """I will puch anyone! >.<"""
-
-        # Command function
-        await self.bot.say("ONE PUNCH! And " + user.mention + " is out! ლ(ಠ益ಠლ)")
-    
     @commands.group(name="file", pass_context=True)
     async def _file(self, ctx):
         """Logged file operations"""
@@ -163,4 +140,4 @@ class Science:
             time.sleep(1)
 
 def setup(bot):
-    bot.add_cog(Science(bot))
+    bot.add_cog(File(bot))
