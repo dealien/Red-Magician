@@ -70,6 +70,7 @@ class File:
                 print('Server: ' + str(server))
             except:
                 await self.bot.say('Please enter a valid server id or name')
+        print('server = ' + server)
         # print('Server: ' + str(server.name))
         # print('Server ID: ' + str(server.id))
         await self.bot.say('These are all the logged attachments for ' + str(server.name) + ' (Server ID: ' + str(server.id) + ')')
