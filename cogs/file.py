@@ -57,10 +57,12 @@ class File:
             for server in self.bot.servers:
                 myservers.append(server)
             servers = [server for server in myservers if server_id_or_substring in str(server)]
+            print('Matching servers: ' + len(servers))
             if len(servers) > 1:
                 raise Exception('Error: ' + server_id_or_substring + ' matched multiple servers. Please either provide more of the name or the server id.')
-            elif len(servers) is 0:
+            if len(servers) is 0:
                 raise Exception('Error: ' + server_id_or_substring + ' did not match any servers.')
+            print('Server: ' + str(servers))
         else:
             try:
                 server = self.bot.get_server(server_id_or_substring)
