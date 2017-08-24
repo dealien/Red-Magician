@@ -150,7 +150,6 @@ class File:
             imagefilecounts.append(str(len(imagefiles)))
             filesizes.append(str(round(get_size("/home/red/Red-DiscordBot/data/activitylogger/" + server.id)/1000000, 3)) + ' MB')
 
-        await self.bot.say('File Info:')
         lines = []
         i = 0
         for server in servers:
