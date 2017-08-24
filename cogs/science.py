@@ -39,7 +39,7 @@ def paginate_string(content):
 def get_size(start_path = '.'):
     return sum(os.path.getsize(os.path.join(dirpath,filename)) for dirpath, dirnames, filenames in os.walk(start_path) for filename in filenames)
 
-class SCIENCE:
+class Science:
     """A custom cog that does stuff! Lots of stuff!"""
 
     def __init__(self, bot):
@@ -163,4 +163,4 @@ class SCIENCE:
             time.sleep(1)
 
 def setup(bot):
-    bot.add_cog(SCIENCE(bot))
+    bot.add_cog(Science(bot))
