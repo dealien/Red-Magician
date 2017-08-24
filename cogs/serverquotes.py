@@ -150,7 +150,7 @@ class ServerQuotes:
         dataIO.save_json(JSON, self.quotes)
         self._upload_quotes()
     
-    def _upload_quotes(self, ctx)
+    def _upload_quotes(self, ctx):
         r = requests.post('https://api.myjson.com/bins', json=self.quotes)
         print(r)
         print('Quotes saved to Myjson')
