@@ -47,22 +47,33 @@ class File:
     @checks.serverowner_or_permissions(administrator=True)
     async def list(self, ctx, server_id_or_substring=None):
         """List names of all logged file attachments for the server specified by id or name substring. Default is the current server."""
+        print('server_id_or_substring = ' + server_id_or_substring)
         if not server_id_or_substring:
-            serverid = ctx.message.server.id
-        elif type(server_id_or_substring) is string:
+            print('Defaulting to current server')
+            server = ctx.message.server
+        elif type(server_id_or_substring) == type(str()):
+            print('Input is a string')
             myservers = []
             for server in self.bot.servers:
                 myservers.append(server)
-            servers = [server for server in myservers if server_id_or_substring in str(server)]
+            servers = [s for s in myservers if server_id_or_substring in str(s)]
+            print('Possible servers: ' + str(len(servers)))
+            for i in servers:
+                print(str(i))
             if len(servers) > 1:
                 raise Exception('Error: ' + server_id_or_substring + ' matched multiple servers. Please either provide more of the name or the server id.')
-            elif len(servers) is 0:
+            if len(servers) is 0:
                 raise Exception('Error: ' + server_id_or_substring + ' did not match any servers.')
+            server = servers[0]
         else:
             try:
                 server = self.bot.get_server(server_id_or_substring)
+                print('Input is a server id')
+                print('Server: ' + str(server))
             except:
                 await self.bot.say('Please enter a valid server id or name')
+        print('Server Name: ' + str(server.name))
+        print('Server ID: ' + str(server.id))
         # print('Server: ' + str(server.name))
         # print('Server ID: ' + str(server.id))
         await self.bot.say('These are all the logged attachments for ' + str(server.name) + ' (Server ID: ' + str(server.id) + ')')
