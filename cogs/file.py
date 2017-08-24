@@ -62,7 +62,7 @@ class File:
                 raise Exception('Error: ' + server_id_or_substring + ' matched multiple servers. Please either provide more of the name or the server id.')
             if len(servers) is 0:
                 raise Exception('Error: ' + server_id_or_substring + ' did not match any servers.')
-            print('Server: ' + str(servers[1]))
+            print('Server: ' + str(servers[0]))
         else:
             try:
                 server = self.bot.get_server(server_id_or_substring)
