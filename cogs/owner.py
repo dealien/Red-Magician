@@ -864,7 +864,7 @@ class Owner:
 
     @commands.command()
     async def info(self):
-        """Shows info about Red"""
+        """Shows info about Red Magician"""
         author_repo = "https://github.com/dealien"
         red_repo = author_repo + "/Red-Magician"
         server_url = "https://discord.gg/SN4TvHJ"
@@ -898,7 +898,7 @@ class Owner:
         embed.add_field(name="Instance owned by", value=str(owner))
         embed.add_field(name="Python", value=py_version)
         embed.add_field(name="discord.py", value=dpy_version)
-        embed.add_field(name="About Red", value=about, inline=False)
+        embed.add_field(name="About Red Magician", value=about, inline=False)
         embed.set_footer(text="Bringing joy since 02 Jan 2016 (over "
                          "{} days ago!)".format(days_since))
 
