@@ -49,7 +49,7 @@ class File:
         """List names of all logged file attachments for the server specified by id or name substring. Default is the current server."""
         if not server_id_or_substring:
             serverid = ctx.message.server.id
-        elif type(server_id_or_substring) is string:
+        elif type(server_id_or_substring) == type(str()):
             myservers = []
             for server in self.bot.servers:
                 myservers.append(server)
