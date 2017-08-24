@@ -45,24 +45,11 @@ class File:
 
     @_file.command(pass_context=True)
     @checks.serverowner_or_permissions(administrator=True)
-    async def list(self, ctx, server_id_or_substring=None):
-        """List names of all logged file attachments for the server specified by id or name substring. Default is the current server."""
-        if not server_id_or_substring:
+    async def list(self, ctx, serverid=None):
+        """List names of all logged file attachments for the server specified by id. Default is the current server. """
+        if not serverid:
             serverid = ctx.message.server.id
-        elif type(server_id_or_substring) is string:
-            myservers = []
-            for server in self.bot.servers:
-                myservers.append(server)
-            servers = [server for server in myservers if server_id_or_substring in str(server)]
-            if len(servers) > 1:
-                raise Exception('Error: ' + server_id_or_substring + ' matched multiple servers. Please either provide more of the name or the server id.')
-            elif len(servers) is 0:
-                raise Exception('Error: ' + server_id_or_substring + ' did not match any servers.')
-        else:
-            try:
-                server = self.bot.get_server(server_id_or_substring)
-            except:
-                await self.bot.say('Please enter a valid server id or name')
+        server = self.bot.get_server(serverid)
         # print('Server: ' + str(server.name))
         # print('Server ID: ' + str(server.id))
         await self.bot.say('These are all the logged attachments for ' + str(server.name) + ' (Server ID: ' + str(server.id) + ')')
