@@ -31,7 +31,7 @@ def paginate_string(content):
 def get_size(start_path = '.'):
     return sum(os.path.getsize(os.path.join(dirpath,filename)) for dirpath, dirnames, filenames in os.walk(start_path) for filename in filenames)
 
-class FILE:
+class File:
     """A custom cog that does stuff! Lots of stuff!"""
 
     def __init__(self, bot):
@@ -140,4 +140,4 @@ class FILE:
             time.sleep(1)
 
 def setup(bot):
-    bot.add_cog(FILE(bot))
+    bot.add_cog(File(bot))
