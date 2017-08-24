@@ -50,7 +50,7 @@ class File:
         print('server_id_or_substring = ' + server_id_or_substring)
         if not server_id_or_substring:
             print('Defaulting to current server')
-            serverid = ctx.message.server.id
+            server = ctx.message.server
         elif type(server_id_or_substring) == type(str()):
             print('Input is a string')
             myservers = []
@@ -62,7 +62,7 @@ class File:
                 raise Exception('Error: ' + server_id_or_substring + ' matched multiple servers. Please either provide more of the name or the server id.')
             if len(servers) is 0:
                 raise Exception('Error: ' + server_id_or_substring + ' did not match any servers.')
-            print('Server: ' + str(servers[0]))
+            server = servers[0]
         else:
             try:
                 server = self.bot.get_server(server_id_or_substring)
