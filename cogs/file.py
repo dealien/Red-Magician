@@ -47,9 +47,12 @@ class File:
     @checks.serverowner_or_permissions(administrator=True)
     async def list(self, ctx, server_id_or_substring=None):
         """List names of all logged file attachments for the server specified by id or name substring. Default is the current server."""
+        print('server_id_or_substring = ' + server_id_or_substring)
         if not server_id_or_substring:
+            print('Defaulting to current server')
             serverid = ctx.message.server.id
         elif type(server_id_or_substring) == type(str()):
+            print('Input is a string')
             myservers = []
             for server in self.bot.servers:
                 myservers.append(server)
@@ -61,6 +64,7 @@ class File:
         else:
             try:
                 server = self.bot.get_server(server_id_or_substring)
+                print('Input is a server id')
             except:
                 await self.bot.say('Please enter a valid server id or name')
         # print('Server: ' + str(server.name))
