@@ -32,7 +32,7 @@ def get_size(start_path = '.'):
     return sum(os.path.getsize(os.path.join(dirpath,filename)) for dirpath, dirnames, filenames in os.walk(start_path) for filename in filenames)
 
 class File:
-    """A cog for various file operations."""
+    """A custom cog that does stuff! Lots of stuff!"""
 
     def __init__(self, bot):
         self.bot = bot
