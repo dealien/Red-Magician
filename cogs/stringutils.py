@@ -30,5 +30,3 @@ class StringFuncs:
 
 def setup(bot):
     bot.add_cog(StringFuncs(bot))
-
-pagify()
