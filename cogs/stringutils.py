@@ -25,7 +25,7 @@ class StringFuncs:
     @_string.command(pass_context=True)
     async def length(self, ctx, input_string):
         """Returns the length of the input string."""
-        await self.bot.say(str(len(input_string)))
+        await self.bot.say('`' + str(len(input_string)) + '`')
         
 
 def setup(bot):
