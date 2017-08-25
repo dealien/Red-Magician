@@ -22,7 +22,7 @@ class StringFuncs:
         if ctx.invoked_subcommand is None:
             await send_cmd_help(ctx)
 
-    @_file.command(pass_context=True)
+    @_string.command(pass_context=True)
     async def length(self, ctx, input_string):
         """Returns the length of the input string."""
         await self.bot.say(str(len(input_string)))
