@@ -356,9 +356,6 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
 
         print("\nVyrenGames's Server: https://discord.gg/SN4TvHJ")
 
-        print("Make sure to keep your bot updated. Select the 'Update' "
-              "option from the launcher.")
-
         await bot.get_cog('Owner').disable_commands()
 
     @bot.event
