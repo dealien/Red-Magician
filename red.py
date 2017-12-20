@@ -343,7 +343,7 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
         if len(bot.settings.prefixes) > 1:
             prefix_label += 'es'
         print("{}: {}".format(prefix_label, " ".join(bot.settings.prefixes)))
-        print("Owner: " + str(owner))
+        print("Owner: {}".format(owner))
         print("{}/{} active cogs with {} commands".format(
             len(bot.cogs), total_cogs, len(bot.commands)))
         print("--------------------------")
