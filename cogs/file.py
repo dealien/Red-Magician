@@ -201,12 +201,15 @@ class File:
                 file = os.path.join(path, filename)
                 files_.append(str(file))
         files = [word for word in files_ if not blacklist.search(word)]
-        print('\n'.join(files))
+        print('Number of files: {}'.format(files.len()))
+        await self.bot.say('Number of files: {}'.format(files.len()))
         for file in files:
             print('Uploading {}'.format(file))
-            await self.bot.upload(file)
-            # This pause reduces the choppiness of the messages by going as fast as Discord allows but at regular intervals
-            time.sleep(1)
+            try: 
+                await self.bot.upload(file)
+            except discord.HTTPException:
+                await self.bot.say('I need the `Attach Files` permission to do this')
+        await self.bot.say('Done')
 
 
 
