@@ -14,7 +14,6 @@ import re
 import os
 from datetime import datetime, timedelta
 
-
 def paginate_string(content):
     page = '```'
     pages = []
@@ -47,7 +46,6 @@ class File:
     @checks.serverowner_or_permissions(administrator=True)
     async def list(self, ctx, server_id_or_substring=None):
         """List names of all logged file attachments for the server specified by id or name substring. Default is the current server."""
-        print('server_id_or_substring = ' + str(server_id_or_substring))
         if not server_id_or_substring:
             print('Defaulting to current server')
             server = ctx.message.server
@@ -76,7 +74,7 @@ class File:
         print('Server ID: ' + str(server.id))
         # print('Server: ' + str(server.name))
         # print('Server ID: ' + str(server.id))
-        await self.bot.say('These are all the logged attachments for ' + str(server.name) + ' (Server ID: ' + str(server.id) + ')')
+        await self.bot.say('These are the names of all the logged attachments for ' + str(server.name) + ' (Server ID: ' + str(server.id) + ')')
         B = ['.log', '.json']
         blacklist = re.compile('|'.join([re.escape(word) for word in B]))
         files_ = []
@@ -94,7 +92,7 @@ class File:
         await self.bot.say('Number of pages: ' + str(len(pages)))
         for page in pages:
             await self.bot.say(page)
-            # This pause reduces the choppyness of the messages by going as fast as Discord allows but at regular intervals
+            # This pause reduces the choppiness of the messages by going as fast as Discord allows but at regular intervals
             time.sleep(1)
 
     @_file.command(pass_context=True)
@@ -159,8 +157,63 @@ class File:
         pages = paginate_string(lines)
         for page in pages:
             await self.bot.say(page)
-            # This pause reduces the choppyness of the messages by going as fast as Discord allows but at regular intervals
+            # This pause reduces the choppiness of the messages by going as fast as Discord allows but at regular intervals
             time.sleep(1)
+
+    @_file.command(pass_context=True)
+    @checks.serverowner_or_permissions(administrator=True)
+    async def upload(self, ctx, server_id_or_substring=None):
+        """Reupload all logged file attachments for the server specified by id or name substring. Default is the current server."""
+        if not server_id_or_substring:
+            print('Defaulting to current server')
+            server = ctx.message.server
+        elif type(server_id_or_substring) == type(str()):
+            print('Input is a string')
+            myservers = []
+            for server in self.bot.servers:
+                myservers.append(server)
+            servers = [s for s in myservers if server_id_or_substring in str(s)]
+            print('Possible servers: ' + str(len(servers)))
+            for i in servers:
+                print(str(i))
+            if len(servers) > 1:
+                raise Exception('Error: ' + server_id_or_substring + ' matched multiple servers. Please either provide more of the name or the server id.')
+            if len(servers) is 0:
+                raise Exception('Error: ' + server_id_or_substring + ' did not match any servers.')
+            server = servers[0]
+        else:
+            try:
+                server = self.bot.get_server(server_id_or_substring)
+                print('Input is a server id')
+                print('Server: ' + str(server))
+            except:
+                await self.bot.say('Please enter a valid server id or name')
+        print('Server Name: ' + str(server.name))
+        print('Server ID: ' + str(server.id))
+        await self.bot.say('These are all the logged attachments for {} (Server ID: {})'.format(str(server.name), str(server.id)))
+        B = ['.log']
+        blacklist = re.compile('|'.join([re.escape(word) for word in B]))
+        files_ = []
+        sdir = '/home/red/Red-DiscordBot/data/activitylogger/{}'.format(str(server.id))
+        print('Server directory: {}'.format(sdir))
+        for path, subdirs, filelist in os.walk(sdir):
+            for filename in filelist:
+                file = os.path.join(path, filename)
+                files_.append(str(file))
+        files = [word for word in files_ if not blacklist.search(word)]
+        print('Number of files: {}'.format(files.len()))
+        await self.bot.say('Number of files: {}'.format(files.len()))
+        for file in files:
+            print('Uploading {}'.format(file))
+            try: 
+                await self.bot.upload(file)
+            except discord.HTTPException:
+                await self.bot.say('I need the `Attach Files` permission to do this')
+        await self.bot.say('Done')
+
+
+
+
 
 def setup(bot):
     bot.add_cog(File(bot))
