@@ -5,11 +5,10 @@ The :mod:`websockets.client` module defines a simple WebSocket client API.
 
 import asyncio
 import collections.abc
-import email.message
 
-from .exceptions import InvalidHandshake
+from .exceptions import InvalidHandshake, InvalidMessage, InvalidStatusCode
 from .handshake import build_request, check_response
-from .http import USER_AGENT, read_response
+from .http import USER_AGENT, build_headers, read_response
 from .protocol import CONNECTING, OPEN, WebSocketCommonProtocol
 from .uri import parse_uri
 
@@ -29,6 +28,60 @@ class WebSocketClientProtocol(WebSocketCommonProtocol):
     state = CONNECTING
 
     @asyncio.coroutine
+    def write_http_request(self, path, headers):
+        """
+        Write request line and headers to the HTTP request.
+
+        """
+        self.path = path
+        self.request_headers = build_headers(headers)
+        self.raw_request_headers = headers
+
+        # Since the path and headers only contain ASCII characters,
+        # we can keep this simple.
+        request = ['GET {path} HTTP/1.1'.format(path=path)]
+        request.extend('{}: {}'.format(k, v) for k, v in headers)
+        request.append('\r\n')
+        request = '\r\n'.join(request).encode()
+
+        self.writer.write(request)
+
+    @asyncio.coroutine
+    def read_http_response(self):
+        """
+        Read status line and headers from the HTTP response.
+
+        Raise :exc:`~websockets.exceptions.InvalidMessage` if the HTTP message
+        is malformed or isn't an HTTP/1.1 GET request.
+
+        Don't attempt to read the response body because WebSocket handshake
+        responses don't have one. If the response contains a body, it may be
+        read from ``self.reader`` after this coroutine returns.
+
+        """
+        try:
+            status_code, headers = yield from read_response(self.reader)
+        except ValueError as exc:
+            raise InvalidMessage("Malformed HTTP message") from exc
+
+        self.response_headers = build_headers(headers)
+        self.raw_response_headers = headers
+
+        return status_code, self.response_headers
+
+    def process_subprotocol(self, get_header, subprotocols=None):
+        """
+        Handle the Sec-WebSocket-Protocol HTTP header.
+
+        """
+        subprotocol = get_header('Sec-WebSocket-Protocol')
+        if subprotocol:
+            if subprotocols is None or subprotocol not in subprotocols:
+                raise InvalidHandshake(
+                    "Unknown subprotocol: {}".format(subprotocol))
+            return subprotocol
+
+    @asyncio.coroutine
     def handshake(self, wsuri,
                   origin=None, subprotocols=None, extra_headers=None):
         """
@@ -45,6 +98,7 @@ class WebSocketClientProtocol(WebSocketCommonProtocol):
         """
         headers = []
         set_header = lambda k, v: headers.append((k, v))
+
         if wsuri.port == (443 if wsuri.secure else 80):     # pragma: no cover
             set_header('Host', wsuri.host)
         else:
@@ -59,40 +113,20 @@ class WebSocketClientProtocol(WebSocketCommonProtocol):
             for name, value in extra_headers:
                 set_header(name, value)
         set_header('User-Agent', USER_AGENT)
+
         key = build_request(set_header)
 
-        self.request_headers = email.message.Message()
-        for name, value in headers:
-            self.request_headers[name] = value
-        self.raw_request_headers = headers
+        yield from self.write_http_request(wsuri.resource_name, headers)
 
-        # Send handshake request. Since the URI and the headers only contain
-        # ASCII characters, we can keep this simple.
-        request = ['GET %s HTTP/1.1' % wsuri.resource_name]
-        request.extend('{}: {}'.format(k, v) for k, v in headers)
-        request.append('\r\n')
-        request = '\r\n'.join(request).encode()
-        self.writer.write(request)
-
-        # Read handshake response.
-        try:
-            status_code, headers = yield from read_response(self.reader)
-        except ValueError as exc:
-            raise InvalidHandshake("Malformed HTTP message") from exc
-        if status_code != 101:
-            raise InvalidHandshake("Bad status code: {}".format(status_code))
-
-        self.response_headers = headers
-        self.raw_response_headers = list(headers.raw_items())
-
+        status_code, headers = yield from self.read_http_response()
         get_header = lambda k: headers.get(k, '')
+
+        if status_code != 101:
+            raise InvalidStatusCode(status_code)
+
         check_response(get_header, key)
 
-        self.subprotocol = headers.get('Sec-WebSocket-Protocol', None)
-        if (self.subprotocol is not None and
-                self.subprotocol not in subprotocols):
-            raise InvalidHandshake(
-                "Unknown subprotocol: {}".format(self.subprotocol))
+        self.subprotocol = self.process_subprotocol(get_header, subprotocols)
 
         assert self.state == CONNECTING
         self.state = OPEN
@@ -101,9 +135,10 @@ class WebSocketClientProtocol(WebSocketCommonProtocol):
 
 @asyncio.coroutine
 def connect(uri, *,
-            klass=WebSocketClientProtocol,
+            create_protocol=None,
             timeout=10, max_size=2 ** 20, max_queue=2 ** 5,
-            loop=None, legacy_recv=False,
+            read_limit=2 ** 16, write_limit=2 ** 16,
+            loop=None, legacy_recv=False, klass=None,
             origin=None, subprotocols=None, extra_headers=None,
             **kwds):
     """
@@ -113,7 +148,7 @@ def connect(uri, *,
     send and receive messages.
 
     :func:`connect` is a wrapper around the event loop's
-    :meth:`~asyncio.BaseEventLoop.create_connection` method. Extra keyword
+    :meth:`~asyncio.BaseEventLoop.create_connection` method. Unknown keyword
     arguments are passed to :meth:`~asyncio.BaseEventLoop.create_connection`.
 
     For example, you can set the ``ssl`` keyword argument to a
@@ -121,9 +156,15 @@ def connect(uri, *,
     a ``wss://`` URI, if this argument isn't provided explicitly, it's set to
     ``True``, which means Python's default :class:`~ssl.SSLContext` is used.
 
-    The behavior of the ``timeout``, ``max_size``, and ``max_queue`` optional
-    arguments is described the documentation of
-    :class:`~websockets.protocol.WebSocketCommonProtocol`.
+    The behavior of the ``timeout``, ``max_size``, and ``max_queue``,
+    ``read_limit``, and ``write_limit`` optional arguments is described in the
+    documentation of :class:`~websockets.protocol.WebSocketCommonProtocol`.
+
+    The ``create_protocol`` parameter allows customizing the asyncio protocol
+    that manages the connection. It should be a callable or class accepting
+    the same arguments as :class:`WebSocketClientProtocol` and returning a
+    :class:`WebSocketClientProtocol` instance. It defaults to
+    :class:`WebSocketClientProtocol`.
 
     :func:`connect` also accepts the following optional arguments:
 
@@ -144,15 +185,24 @@ def connect(uri, *,
     if loop is None:
         loop = asyncio.get_event_loop()
 
+    # Backwards-compatibility: create_protocol used to be called klass.
+    # In the unlikely event that both are specified, klass is ignored.
+    if create_protocol is None:
+        create_protocol = klass
+
+    if create_protocol is None:
+        create_protocol = WebSocketClientProtocol
+
     wsuri = parse_uri(uri)
     if wsuri.secure:
         kwds.setdefault('ssl', True)
-    elif 'ssl' in kwds:
+    elif kwds.get('ssl') is not None:
         raise ValueError("connect() received a SSL context for a ws:// URI. "
                          "Use a wss:// URI to enable TLS.")
-    factory = lambda: klass(
+    factory = lambda: create_protocol(
         host=wsuri.host, port=wsuri.port, secure=wsuri.secure,
         timeout=timeout, max_size=max_size, max_queue=max_queue,
+        read_limit=read_limit, write_limit=write_limit,
         loop=loop, legacy_recv=legacy_recv,
     )
 

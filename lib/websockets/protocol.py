@@ -15,8 +15,9 @@ import random
 import struct
 
 from .compatibility import asyncio_ensure_future
-from .exceptions import (ConnectionClosed, InvalidState, PayloadTooBig,
-                         WebSocketProtocolError)
+from .exceptions import (
+    ConnectionClosed, InvalidState, PayloadTooBig, WebSocketProtocolError
+)
 from .framing import *
 from .handshake import *
 
@@ -78,13 +79,26 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
     this is 128MB. You may want to lower the limits, depending on your
     application's requirements.
 
-    Once the handshake is complete, request and response HTTP headers are
-    available:
+    The ``read_limit`` argument sets the high-water limit of the buffer for
+    incoming bytes. The low-water limit is half the high-water limit. The
+    default value is 64kB, half of asyncio's default (based on the current
+    implementation of :class:`~asyncio.StreamReader`).
 
-    * as a MIME :class:`~email.message.Message` in the :attr:`request_headers`
+    The ``write_limit`` argument sets the high-water limit of the buffer for
+    outgoing bytes. The low-water limit is a quarter of the high-water limit.
+    The default value is 64kB, equal to asyncio's default (based on the
+    current implementation of ``_FlowControlMixin``).
+
+    As soon as the HTTP request and response in the opening handshake are
+    processed, the request path is available in the :attr:`path` attribute,
+    and the request and response HTTP headers are available:
+
+    * as a :class:`~http.client.HTTPMessage` in the :attr:`request_headers`
       and :attr:`response_headers` attributes
     * as an iterable of (name, value) pairs in the :attr:`raw_request_headers`
       and :attr:`raw_response_headers` attributes
+
+    These attributes must be treated as immutable.
 
     If a subprotocol was negotiated, it's available in the :attr:`subprotocol`
     attribute.
@@ -104,28 +118,34 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
     def __init__(self, *,
                  host=None, port=None, secure=None,
                  timeout=10, max_size=2 ** 20, max_queue=2 ** 5,
+                 read_limit=2 ** 16, write_limit=2 ** 16,
                  loop=None, legacy_recv=False):
         self.host = host
         self.port = port
         self.secure = secure
-
         self.timeout = timeout
         self.max_size = max_size
+        self.max_queue = max_queue
+        self.read_limit = read_limit
+        self.write_limit = write_limit
+
         # Store a reference to loop to avoid relying on self._loop, a private
-        # attribute of StreamReaderProtocol, inherited from FlowControlMixin.
+        # attribute of StreamReaderProtocol, inherited from _FlowControlMixin.
         if loop is None:
             loop = asyncio.get_event_loop()
         self.loop = loop
 
         self.legacy_recv = legacy_recv
 
-        stream_reader = asyncio.StreamReader(loop=loop)
+        # This limit is both the line length limit and half the buffer limit.
+        stream_reader = asyncio.StreamReader(limit=read_limit // 2, loop=loop)
         super().__init__(stream_reader, self.client_connected, loop)
 
         self.reader = None
         self.writer = None
         self._drain_lock = asyncio.Lock(loop=loop)
 
+        self.path = None
         self.request_headers = None
         self.raw_request_headers = None
         self.response_headers = None
@@ -634,6 +654,8 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
     def client_connected(self, reader, writer):
         self.reader = reader
         self.writer = writer
+        # Configure write buffer limit.
+        self.writer._transport.set_write_buffer_limits(self.write_limit)
         # Start the task that handles incoming messages.
         self.worker_task = asyncio_ensure_future(self.run(), loop=self.loop)
 

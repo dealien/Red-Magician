@@ -2,6 +2,9 @@ from array import array
 from collections import abc
 import sys
 
+from ._abc import MultiMapping, MutableMultiMapping
+
+
 _marker = object()
 
 
@@ -120,6 +123,8 @@ class _Base:
                 if i1 != i2 or v1 != v2:
                     return False
             return True
+        if len(self._impl._items) != len(other):
+            return False
         for k, v in self.items():
             nv = other.get(k, _marker)
             if v != nv:
@@ -138,13 +143,7 @@ class _Base:
         return '<{}({})>'.format(self.__class__.__name__, body)
 
 
-class _CIBase(_Base):
-
-    def _title(self, key):
-        return key.title()
-
-
-class MultiDictProxy(_Base, abc.Mapping):
+class MultiDictProxy(_Base, MultiMapping):
 
     def __init__(self, arg):
         if not isinstance(arg, (MultiDict, MultiDictProxy)):
@@ -164,7 +163,7 @@ class MultiDictProxy(_Base, abc.Mapping):
         return MultiDict(self.items())
 
 
-class CIMultiDictProxy(_CIBase, MultiDictProxy):
+class CIMultiDictProxy(MultiDictProxy):
 
     def __init__(self, arg):
         if not isinstance(arg, (CIMultiDict, CIMultiDictProxy)):
@@ -183,12 +182,15 @@ class CIMultiDictProxy(_CIBase, MultiDictProxy):
         return CIMultiDict(self.items())
 
 
-class MultiDict(_Base, abc.MutableMapping):
+class MultiDict(_Base, MutableMultiMapping):
 
     def __init__(self, *args, **kwargs):
         self._impl = _Impl()
 
         self._extend(args, kwargs, self.__class__.__name__, self.add)
+
+    def __reduce__(self):
+        return (self.__class__, (list(self.items()),))
 
     def _title(self, key):
         return key
@@ -367,8 +369,10 @@ class MultiDict(_Base, abc.MutableMapping):
                 i += 1
 
 
-class CIMultiDict(_CIBase, MultiDict):
-    pass
+class CIMultiDict(MultiDict):
+
+    def _title(self, key):
+        return key.title()
 
 
 class _ViewBase:

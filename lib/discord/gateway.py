@@ -41,13 +41,8 @@ import struct
 
 log = logging.getLogger(__name__)
 
-__all__ = [ 'ReconnectWebSocket', 'DiscordWebSocket',
-            'KeepAliveHandler', 'VoiceKeepAliveHandler',
+__all__ = [ 'DiscordWebSocket', 'KeepAliveHandler', 'VoiceKeepAliveHandler',
             'DiscordVoiceWebSocket', 'ResumeWebSocket' ]
-
-class ReconnectWebSocket(Exception):
-    """Signals to handle the RECONNECT opcode."""
-    pass
 
 class ResumeWebSocket(Exception):
     """Signals to initialise via RESUME opcode instead of IDENTIFY."""
@@ -339,7 +334,7 @@ class DiscordWebSocket(websockets.client.WebSocketClientProtocol):
             # internal exception signalling to reconnect.
             log.info('Received RECONNECT opcode.')
             yield from self.close()
-            raise ReconnectWebSocket()
+            raise ResumeWebsocket()
 
         if op == self.HEARTBEAT_ACK:
             self._keep_alive.ack()

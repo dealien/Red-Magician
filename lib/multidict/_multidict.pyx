@@ -6,6 +6,7 @@ from collections.abc import Iterable, Set
 
 from cpython.object cimport PyObject_Str
 
+from ._abc import MultiMapping, MutableMultiMapping
 from ._istr import istr
 
 cdef object _marker = object()
@@ -231,13 +232,14 @@ cdef class MultiDictProxy(_Base):
         self._impl = base._impl
 
     def __reduce__(self):
-        raise TypeError("can't pickle {} objects".format(self.__class__.__name__))
+        raise TypeError("can't pickle {} objects"
+                        .format(self.__class__.__name__))
 
     def copy(self):
         """Return a copy of itself."""
         return self._base_class(self)
 
-abc.Mapping.register(MultiDictProxy)
+MultiMapping.register(MultiDictProxy)
 
 
 cdef class CIMultiDictProxy(MultiDictProxy):
@@ -253,7 +255,7 @@ cdef class CIMultiDictProxy(MultiDictProxy):
         return s.title()
 
 
-abc.Mapping.register(CIMultiDictProxy)
+MultiMapping.register(CIMultiDictProxy)
 
 
 cdef str _str(key):
@@ -279,7 +281,7 @@ cdef class MultiDict(_Base):
     def __reduce__(self):
         return (
             self.__class__,
-            tuple(self.items()),
+            (list(self.items()),)
         )
 
     cdef _extend(self, tuple args, dict kwargs, name, bint do_add):
@@ -292,9 +294,7 @@ cdef class MultiDict(_Base):
 
         if args:
             arg = args[0]
-            if isinstance(arg, CIMultiDict):
-                self._impl._items.extend((<_Base>arg)._impl._items)
-            elif isinstance(arg, _Base):
+            if isinstance(arg, _Base):
                 for i in (<_Base>arg)._impl._items:
                     item = <_Pair>i
                     key = item._key
@@ -386,8 +386,9 @@ cdef class MultiDict(_Base):
 
     def copy(self):
         """Return a copy of itself."""
-        cls = self.__class__
-        return cls(self)
+        ret = MultiDict()
+        ret._extend((list(self.items()),), {}, 'copy', True)
+        return ret
 
     def extend(self, *args, **kwargs):
         """Extend current MultiDict with more values.
@@ -519,7 +520,7 @@ cdef class MultiDict(_Base):
         self._extend(args, kwargs, "update", False)
 
 
-abc.MutableMapping.register(MultiDict)
+MutableMultiMapping.register(MultiDict)
 
 
 cdef class CIMultiDict(MultiDict):
@@ -527,8 +528,13 @@ cdef class CIMultiDict(MultiDict):
 
     def __init__(self, *args, **kwargs):
         self._impl = _Impl()
-
         self._extend(args, kwargs, 'CIMultiDict', True)
+
+    def __reduce__(self):
+        return (
+            self.__class__,
+            (list(self.items()),),
+        )
 
     cdef str _title(self, s):
         typ = type(s)
@@ -538,8 +544,15 @@ cdef class CIMultiDict(MultiDict):
             return PyObject_Str(s)
         return s.title()
 
+    def copy(self):
+        """Return a copy of itself."""
+        ret = CIMultiDict()
+        ret._extend((list(self.items()),), {}, 'copy', True)
+        return ret
 
-abc.MutableMapping.register(CIMultiDict)
+
+
+MutableMultiMapping.register(CIMultiDict)
 
 
 cdef class _ViewBase:

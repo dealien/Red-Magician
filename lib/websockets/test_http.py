@@ -2,10 +2,10 @@ import asyncio
 import unittest
 
 from .http import *
-from .http import read_message  # private API
+from .http import build_headers, read_headers
 
 
-class HTTPTests(unittest.TestCase):
+class HTTPAsyncTests(unittest.TestCase):
 
     def setUp(self):
         super().setUp()
@@ -32,7 +32,7 @@ class HTTPTests(unittest.TestCase):
         )
         path, hdrs = self.loop.run_until_complete(read_request(self.stream))
         self.assertEqual(path, '/chat')
-        self.assertEqual(hdrs['Upgrade'], 'websocket')
+        self.assertEqual(dict(hdrs)['Upgrade'], 'websocket')
 
     def test_read_response(self):
         # Example from the protocol overview in RFC 6455
@@ -44,34 +44,85 @@ class HTTPTests(unittest.TestCase):
             b'Sec-WebSocket-Protocol: chat\r\n'
             b'\r\n'
         )
-        status, hdrs = self.loop.run_until_complete(read_response(self.stream))
-        self.assertEqual(status, 101)
-        self.assertEqual(hdrs['Upgrade'], 'websocket')
+        status_code, headers = self.loop.run_until_complete(
+            read_response(self.stream))
+        self.assertEqual(status_code, 101)
+        self.assertEqual(dict(headers)['Upgrade'], 'websocket')
 
-    def test_method(self):
+    def test_request_method(self):
         self.stream.feed_data(b'OPTIONS * HTTP/1.1\r\n\r\n')
         with self.assertRaises(ValueError):
             self.loop.run_until_complete(read_request(self.stream))
 
-    def test_version(self):
+    def test_request_version(self):
         self.stream.feed_data(b'GET /chat HTTP/1.0\r\n\r\n')
         with self.assertRaises(ValueError):
             self.loop.run_until_complete(read_request(self.stream))
+
+    def test_response_version(self):
         self.stream.feed_data(b'HTTP/1.0 400 Bad Request\r\n\r\n')
         with self.assertRaises(ValueError):
             self.loop.run_until_complete(read_response(self.stream))
 
+    def test_response_status(self):
+        self.stream.feed_data(b'HTTP/1.1 007 My name is Bond\r\n\r\n')
+        with self.assertRaises(ValueError):
+            self.loop.run_until_complete(read_response(self.stream))
+
+    def test_response_reason(self):
+        self.stream.feed_data(b'HTTP/1.1 200 \x7f\r\n\r\n')
+        with self.assertRaises(ValueError):
+            self.loop.run_until_complete(read_response(self.stream))
+
+    def test_header_name(self):
+        self.stream.feed_data(b'foo bar: baz qux\r\n\r\n')
+        with self.assertRaises(ValueError):
+            self.loop.run_until_complete(read_headers(self.stream))
+
+    def test_header_value(self):
+        self.stream.feed_data(b'foo: \x00\x00\x0f\r\n\r\n')
+        with self.assertRaises(ValueError):
+            self.loop.run_until_complete(read_headers(self.stream))
+
     def test_headers_limit(self):
         self.stream.feed_data(b'foo: bar\r\n' * 500 + b'\r\n')
         with self.assertRaises(ValueError):
-            self.loop.run_until_complete(read_message(self.stream))
+            self.loop.run_until_complete(read_headers(self.stream))
 
     def test_line_limit(self):
         self.stream.feed_data(b'a' * 5000 + b'\r\n\r\n')
         with self.assertRaises(ValueError):
-            self.loop.run_until_complete(read_message(self.stream))
+            self.loop.run_until_complete(read_headers(self.stream))
 
     def test_line_ending(self):
-        self.stream.feed_data(b'GET / HTTP/1.1\n\n')
+        self.stream.feed_data(b'foo: bar\n\n')
         with self.assertRaises(ValueError):
-            self.loop.run_until_complete(read_message(self.stream))
+            self.loop.run_until_complete(read_headers(self.stream))
+
+
+class HTTPSyncTests(unittest.TestCase):
+
+    def test_build_headers(self):
+        headers = build_headers([
+            ('X-Foo', 'Bar'),
+            ('X-Baz', 'Quux Quux'),
+        ])
+
+        self.assertEqual(headers['X-Foo'], 'Bar')
+        self.assertEqual(headers['X-Bar'], None)
+
+        self.assertEqual(headers.get('X-Bar', ''), '')
+        self.assertEqual(headers.get('X-Baz', ''), 'Quux Quux')
+
+    def test_build_headers_multi_value(self):
+        headers = build_headers([
+            ('X-Foo', 'Bar'),
+            ('X-Foo', 'Baz'),
+        ])
+
+        # Getting a single value is non-deterministic.
+        self.assertIn(headers['X-Foo'], ['Bar', 'Baz'])
+        self.assertIn(headers.get('X-Foo'), ['Bar', 'Baz'])
+
+        # Ordering is deterministic when getting all values.
+        self.assertEqual(headers.get_all('X-Foo'), ['Bar', 'Baz'])

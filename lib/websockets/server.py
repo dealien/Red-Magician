@@ -1,3 +1,4 @@
+
 """
 The :mod:`websockets.server` module defines a simple WebSocket server API.
 
@@ -5,13 +6,17 @@ The :mod:`websockets.server` module defines a simple WebSocket server API.
 
 import asyncio
 import collections.abc
-import email.message
 import logging
 
-from .compatibility import asyncio_ensure_future
-from .exceptions import InvalidHandshake, InvalidOrigin
+from .compatibility import (
+    BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, SERVICE_UNAVAILABLE,
+    SWITCHING_PROTOCOLS, asyncio_ensure_future
+)
+from .exceptions import (
+    AbortHandshake, InvalidHandshake, InvalidMessage, InvalidOrigin
+)
 from .handshake import build_response, check_request
-from .http import USER_AGENT, read_request
+from .http import USER_AGENT, build_headers, read_request
 from .protocol import CONNECTING, OPEN, WebSocketCommonProtocol
 
 
@@ -63,22 +68,49 @@ class WebSocketServerProtocol(WebSocketCommonProtocol):
                     origins=self.origins, subprotocols=self.subprotocols,
                     extra_headers=self.extra_headers)
             except ConnectionError as exc:
-                logger.info('Connection error during opening handshake', exc_info=True)
+                logger.debug(
+                    "Connection error in opening handshake", exc_info=True)
                 raise
             except Exception as exc:
                 if self._is_server_shutting_down(exc):
-                    response = ('HTTP/1.1 503 Service Unavailable\r\n\r\n'
-                                'Server is shutting down.')
+                    early_response = (
+                        SERVICE_UNAVAILABLE,
+                        [],
+                        b"Server is shutting down.",
+                    )
+                elif isinstance(exc, AbortHandshake):
+                    early_response = (
+                        exc.status,
+                        exc.headers,
+                        exc.body,
+                    )
                 elif isinstance(exc, InvalidOrigin):
-                    response = 'HTTP/1.1 403 Forbidden\r\n\r\n' + str(exc)
+                    logger.warning("Invalid origin", exc_info=True)
+                    early_response = (
+                        FORBIDDEN,
+                        [],
+                        str(exc).encode(),
+                    )
                 elif isinstance(exc, InvalidHandshake):
-                    response = 'HTTP/1.1 400 Bad Request\r\n\r\n' + str(exc)
+                    logger.warning("Invalid handshake", exc_info=True)
+                    early_response = (
+                        BAD_REQUEST,
+                        [],
+                        str(exc).encode(),
+                    )
                 else:
                     logger.warning("Error in opening handshake", exc_info=True)
-                    response = ('HTTP/1.1 500 Internal Server Error\r\n\r\n'
-                                'See server log for more information.')
-                self.writer.write(response.encode())
-                raise
+                    early_response = (
+                        INTERNAL_SERVER_ERROR,
+                        [],
+                        b"See server log for more information.",
+                    )
+
+                yield from self.write_http_response(*early_response)
+                self.opening_handshake.set_result(False)
+                yield from self.close_connection(force=True)
+
+                return
 
             try:
                 yield from self.ws_handler(self, path)
@@ -93,14 +125,11 @@ class WebSocketServerProtocol(WebSocketCommonProtocol):
             try:
                 yield from self.close()
             except ConnectionError as exc:
-                if self._is_server_shutting_down(exc):
-                    pass
-                logger.info('Connection error in closing handshake', exc_info=True)
+                logger.debug(
+                    "Connection error in closing handshake", exc_info=True)
                 raise
             except Exception as exc:
-                if self._is_server_shutting_down(exc):
-                    pass
-                else:
+                if not self._is_server_shutting_down(exc):
                     logger.warning("Error in closing handshake", exc_info=True)
                 raise
 
@@ -129,6 +158,122 @@ class WebSocketServerProtocol(WebSocketCommonProtocol):
         )
 
     @asyncio.coroutine
+    def read_http_request(self):
+        """
+        Read request line and headers from the HTTP request.
+
+        Raise :exc:`~websockets.exceptions.InvalidMessage` if the HTTP message
+        is malformed or isn't an HTTP/1.1 GET request.
+
+        Don't attempt to read the request body because WebSocket handshake
+        requests don't have one. If the request contains a body, it may be
+        read from ``self.reader`` after this coroutine returns.
+
+        """
+        try:
+            path, headers = yield from read_request(self.reader)
+        except ValueError as exc:
+            raise InvalidMessage("Malformed HTTP message") from exc
+
+        self.path = path
+        self.request_headers = build_headers(headers)
+        self.raw_request_headers = headers
+
+        return path, self.request_headers
+
+    @asyncio.coroutine
+    def write_http_response(self, status, headers, body=None):
+        """
+        Write status line and headers to the HTTP response.
+
+        This coroutine is also able to write a response body.
+
+        """
+        self.response_headers = build_headers(headers)
+        self.raw_response_headers = headers
+
+        # Since the status line and headers only contain ASCII characters,
+        # we can keep this simple.
+        response = [
+            'HTTP/1.1 {value} {phrase}'.format(
+                value=status.value, phrase=status.phrase)]
+        response.extend('{}: {}'.format(k, v) for k, v in headers)
+        response.append('\r\n')
+        response = '\r\n'.join(response).encode()
+
+        self.writer.write(response)
+
+        if body is not None:
+            self.writer.write(body)
+
+    @asyncio.coroutine
+    def process_request(self, path, request_headers):
+        """
+        Intercept the HTTP request and return an HTTP response if needed.
+
+        ``request_headers`` are a :class:`~http.client.HTTPMessage`.
+
+        If this coroutine returns ``None``, the WebSocket handshake continues.
+        If it returns a status code, headers and a optionally a response body,
+        that HTTP response is sent and the connection is closed.
+
+        The HTTP status must be a :class:`~http.HTTPStatus`. HTTP headers must
+        be an iterable of ``(name, value)`` pairs. If provided, the HTTP
+        response body must be :class:`bytes`.
+
+        (:class:`~http.HTTPStatus` was added in Python 3.5. Use a compatible
+        object on earlier versions. Look at ``SWITCHING_PROTOCOLS`` in
+        ``websockets.compatibility`` for an example.)
+
+        This method may be overridden to check the request headers and set a
+        different status, for example to authenticate the request and return
+        ``HTTPStatus.UNAUTHORIZED`` or ``HTTPStatus.FORBIDDEN``.
+
+        It is declared as a coroutine because such authentication checks are
+        likely to require network requests.
+
+        """
+
+    def process_origin(self, get_header, origins=None):
+        """
+        Handle the Origin HTTP header.
+
+        Raise :exc:`~websockets.exceptions.InvalidOrigin` if the origin isn't
+        acceptable.
+
+        """
+        origin = get_header('Origin')
+        if origins is not None:
+            if origin not in origins:
+                raise InvalidOrigin("Origin not allowed: {}".format(origin))
+        return origin
+
+    def process_subprotocol(self, get_header, subprotocols=None):
+        """
+        Handle the Sec-WebSocket-Protocol HTTP header.
+
+        """
+        if subprotocols is not None:
+            subprotocol = get_header('Sec-WebSocket-Protocol')
+            if subprotocol:
+                return self.select_subprotocol(
+                    [p.strip() for p in subprotocol.split(',')],
+                    subprotocols,
+                )
+
+    @staticmethod
+    def select_subprotocol(client_protos, server_protos):
+        """
+        Pick a subprotocol among those offered by the client.
+
+        """
+        common_protos = set(client_protos) & set(server_protos)
+        if not common_protos:
+            return None
+        priority = lambda p: client_protos.index(p) + server_protos.index(p)
+        return sorted(common_protos, key=priority)[0]
+
+    @asyncio.coroutine
     def handshake(self, origins=None, subprotocols=None, extra_headers=None):
         """
         Perform the server side of the opening handshake.
@@ -143,36 +288,33 @@ class WebSocketServerProtocol(WebSocketCommonProtocol):
         It can be a mapping or an iterable of (name, value) pairs. It can also
         be a callable taking the request path and headers in arguments.
 
+        Raise :exc:`~websockets.exceptions.InvalidHandshake` or a subclass if
+        the handshake fails.
+
         Return the URI of the request.
 
         """
-        # Read handshake request.
-        try:
-            path, headers = yield from read_request(self.reader)
-        except ValueError as exc:
-            raise InvalidHandshake("Malformed HTTP message") from exc
+        path, request_headers = yield from self.read_http_request()
 
-        self.request_headers = headers
-        self.raw_request_headers = list(headers.raw_items())
+        # Hook for customizing request handling, for example checking
+        # authentication or treating some paths as plain HTTP endpoints.
 
-        get_header = lambda k: headers.get(k, '')
+        early_response = yield from self.process_request(path, request_headers)
+        if early_response is not None:
+            raise AbortHandshake(*early_response)
+
+        get_header = lambda k: request_headers.get(k, '')
+
         key = check_request(get_header)
 
-        if origins is not None:
-            origin = get_header('Origin')
-            if not set(origin.split() or ['']) <= set(origins):
-                raise InvalidOrigin("Origin not allowed: {}".format(origin))
+        self.origin = self.process_origin(get_header, origins)
+        self.subprotocol = self.process_subprotocol(get_header, subprotocols)
 
-        if subprotocols is not None:
-            protocol = get_header('Sec-WebSocket-Protocol')
-            if protocol:
-                client_subprotocols = [p.strip() for p in protocol.split(',')]
-                self.subprotocol = self.select_subprotocol(
-                    client_subprotocols, subprotocols)
+        response_headers = []
+        set_header = lambda k, v: response_headers.append((k, v))
 
-        headers = []
-        set_header = lambda k, v: headers.append((k, v))
         set_header('Server', USER_AGENT)
+
         if self.subprotocol:
             set_header('Sec-WebSocket-Protocol', self.subprotocol)
         if extra_headers is not None:
@@ -184,18 +326,8 @@ class WebSocketServerProtocol(WebSocketCommonProtocol):
                 set_header(name, value)
         build_response(set_header, key)
 
-        self.response_headers = email.message.Message()
-        for name, value in headers:
-            self.response_headers[name] = value
-        self.raw_response_headers = headers
-
-        # Send handshake response. Since the status line and headers only
-        # contain ASCII characters, we can keep this simple.
-        response = ['HTTP/1.1 101 Switching Protocols']
-        response.extend('{}: {}'.format(k, v) for k, v in headers)
-        response.append('\r\n')
-        response = '\r\n'.join(response).encode()
-        self.writer.write(response)
+        yield from self.write_http_response(
+            SWITCHING_PROTOCOLS, response_headers)
 
         assert self.state == CONNECTING
         self.state = OPEN
@@ -203,22 +335,25 @@ class WebSocketServerProtocol(WebSocketCommonProtocol):
 
         return path
 
-    @staticmethod
-    def select_subprotocol(client_protos, server_protos):
-        """
-        Pick a subprotocol among those offered by the client.
 
-        """
-        common_protos = set(client_protos) & set(server_protos)
-        if not common_protos:
-            return None
-        priority = lambda p: client_protos.index(p) + server_protos.index(p)
-        return sorted(common_protos, key=priority)[0]
-
-
-class WebSocketServer(asyncio.AbstractServer):
+class WebSocketServer:
     """
-    Wrapper for :class:`~asyncio.Server` that triggers the closing handshake.
+    Wraps an underlying :class:`~asyncio.Server` object.
+
+    This class provides the return type of :func:`~websockets.server.serve`.
+    This class shouldn't be instantiated directly.
+
+    Objects of this class store a reference to an underlying
+    :class:`~asyncio.Server` object returned by
+    :meth:`~asyncio.AbstractEventLoop.create_server`. The class stores a
+    reference rather than inheriting from :class:`~asyncio.Server` in part
+    because :meth:`~asyncio.AbstractEventLoop.create_server` doesn't support
+    passing a custom :class:`~asyncio.Server` class.
+
+    :class:`WebSocketServer` supports cleaning up the underlying
+    :class:`~asyncio.Server` object and other resources by implementing the
+    interface of ``asyncio.events.AbstractServer``, namely its ``close()``
+    and ``wait_closed()`` methods.
 
     """
     def __init__(self, loop):
@@ -232,13 +367,14 @@ class WebSocketServer(asyncio.AbstractServer):
         """
         Attach to a given :class:`~asyncio.Server`.
 
-        Since :meth:`~asyncio.BaseEventLoop.create_server` doesn't support
+        Since :meth:`~asyncio.AbstractEventLoop.create_server` doesn't support
         injecting a custom ``Server`` class, a simple solution that doesn't
         rely on private APIs is to:
 
         - instantiate a :class:`WebSocketServer`
         - give the protocol factory a reference to that instance
-        - call :meth:`~asyncio.BaseEventLoop.create_server` with the factory
+        - call :meth:`~asyncio.AbstractEventLoop.create_server` with the
+          factory
         - attach the resulting :class:`~asyncio.Server` with this method
 
         """
@@ -252,7 +388,11 @@ class WebSocketServer(asyncio.AbstractServer):
 
     def close(self):
         """
-        Stop accepting new connections and close open connections.
+        Close the underlying server, and clean up connections.
+
+        This calls :meth:`~asyncio.Server.close` on the underlying
+        :class:`~asyncio.Server` object, closes open connections with
+        status code 1001, and stops accepting new connections.
 
         """
         # Make a note that the server is shutting down. Websocket connections
@@ -275,7 +415,11 @@ class WebSocketServer(asyncio.AbstractServer):
     @asyncio.coroutine
     def wait_closed(self):
         """
-        Wait until all connections are closed.
+        Wait until the underlying server and all connections are closed.
+
+        This calls :meth:`~asyncio.Server.wait_closed` on the underlying
+        :class:`~asyncio.Server` object and waits until closing handshakes
+        are complete and all connections are closed.
 
         This method must be called after :meth:`close()`.
 
@@ -293,35 +437,48 @@ class WebSocketServer(asyncio.AbstractServer):
 
 @asyncio.coroutine
 def serve(ws_handler, host=None, port=None, *,
-          klass=WebSocketServerProtocol,
+          create_protocol=None,
           timeout=10, max_size=2 ** 20, max_queue=2 ** 5,
-          loop=None, legacy_recv=False,
+          read_limit=2 ** 16, write_limit=2 ** 16,
+          loop=None, legacy_recv=False, klass=None,
           origins=None, subprotocols=None, extra_headers=None,
           **kwds):
     """
-    This coroutine creates a WebSocket server.
-
-    It yields a :class:`~asyncio.Server` which provides:
-
-    * a :meth:`~asyncio.Server.close` method that closes open connections with
-      status code 1001 and stops accepting new connections
-    * a :meth:`~asyncio.Server.wait_closed` coroutine that waits until closing
-      handshakes complete and connections are closed.
-
-    ``ws_handler`` is the WebSocket handler. It must be a coroutine accepting
-    two arguments: a :class:`WebSocketServerProtocol` and the request URI.
+    Create, start, and return a :class:`WebSocketServer` object.
 
     :func:`serve` is a wrapper around the event loop's
-    :meth:`~asyncio.BaseEventLoop.create_server` method. ``host``, ``port`` as
-    well as extra keyword arguments are passed to
-    :meth:`~asyncio.BaseEventLoop.create_server`.
+    :meth:`~asyncio.AbstractEventLoop.create_server` method.
+    Internally, the function creates and starts a :class:`~asyncio.Server`
+    object by calling :meth:`~asyncio.AbstractEventLoop.create_server`. The
+    :class:`WebSocketServer` keeps a reference to this object.
 
-    For example, you can set the ``ssl`` keyword argument to a
-    :class:`~ssl.SSLContext` to enable TLS.
+    The returned :class:`WebSocketServer` and its resources can be cleaned
+    up by calling its :meth:`~websockets.server.WebSocketServer.close` and
+    :meth:`~websockets.server.WebSocketServer.wait_closed` methods.
 
-    The behavior of the ``timeout``, ``max_size``, and ``max_queue`` optional
-    arguments is described the documentation of
-    :class:`~websockets.protocol.WebSocketCommonProtocol`.
+    On Python 3.5 and greater, :func:`serve` can also be used as an
+    asynchronous context manager. In this case, the server is shut down
+    when exiting the context.
+
+    The ``ws_handler`` argument is the WebSocket handler. It must be a
+    coroutine accepting two arguments: a :class:`WebSocketServerProtocol`
+    and the request URI.
+
+    The ``host`` and ``port`` arguments, as well as unrecognized keyword
+    arguments, are passed along to
+    :meth:`~asyncio.AbstractEventLoop.create_server`. For example, you can
+    set the ``ssl`` keyword argument to a :class:`~ssl.SSLContext` to enable
+    TLS.
+
+    The ``create_protocol`` parameter allows customizing the asyncio protocol
+    that manages the connection. It should be a callable or class accepting
+    the same arguments as :class:`WebSocketServerProtocol` and returning a
+    :class:`WebSocketServerProtocol` instance. It defaults to
+    :class:`WebSocketServerProtocol`.
+
+    The behavior of the ``timeout``, ``max_size``, and ``max_queue``,
+    ``read_limit``, and ``write_limit`` optional arguments is described in the
+    documentation of :class:`~websockets.protocol.WebSocketCommonProtocol`.
 
     :func:`serve` also accepts the following optional arguments:
 
@@ -351,13 +508,22 @@ def serve(ws_handler, host=None, port=None, *,
     if loop is None:
         loop = asyncio.get_event_loop()
 
+    # Backwards-compatibility: create_protocol used to be called klass.
+    # In the unlikely event that both are specified, klass is ignored.
+    if create_protocol is None:
+        create_protocol = klass
+
+    if create_protocol is None:
+        create_protocol = WebSocketServerProtocol
+
     ws_server = WebSocketServer(loop)
 
     secure = kwds.get('ssl') is not None
-    factory = lambda: klass(
+    factory = lambda: create_protocol(
         ws_handler, ws_server,
         host=host, port=port, secure=secure,
         timeout=timeout, max_size=max_size, max_queue=max_queue,
+        read_limit=read_limit, write_limit=write_limit,
         loop=loop, legacy_recv=legacy_recv,
         origins=origins, subprotocols=subprotocols,
         extra_headers=extra_headers,
@@ -367,3 +533,14 @@ def serve(ws_handler, host=None, port=None, *,
     ws_server.wrap(server)
 
     return ws_server
+
+
+try:
+    from .py35.server import Serve
+except (SyntaxError, ImportError):                          # pragma: no cover
+    pass
+else:
+    Serve.__wrapped__ = serve
+    # Copy over docstring to support building documentation on Python 3.5.
+    Serve.__doc__ = serve.__doc__
+    serve = Serve
