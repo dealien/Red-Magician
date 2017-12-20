@@ -93,9 +93,12 @@ def check_folders():
         print("Creating data/rndstatus folder...")
         os.makedirs("data/rndstatus")
 
-def check_files():
+def check_files():        
     settings = {"DELAY" : 300}
-    default = ["her Turn()", "Tomb Raider II", "Transistor", "NEO Scavenger", "Python", "with your heart."]
+    if str(os.environ.get('IS_HEROKU')) == 'True':
+        default = [str(os.environ.get('PREFIX').split(',')[0]) + 'help']
+    else:
+        default = ["her Turn()", "Tomb Raider II", "Transistor", "NEO Scavenger", "Python", "with your heart."]
 
     f = "data/rndstatus/settings.json"
     if not fileIO(f, "check"):
