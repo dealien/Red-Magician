@@ -240,7 +240,7 @@ class ActivityLogger(object):
         """Fetch complete logs for the current server.
 
         Respects current logging settings such as attachments and channels.
-        Note that server events such as join/leave, ban etc can't be retrieved.
+        Note that server events such as join/leave, ban, etc can't be retrieved.
         """
         server = ctx.message.server
 
