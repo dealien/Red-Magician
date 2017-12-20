@@ -576,13 +576,15 @@ def set_cog(cog, value):  # TODO: move this out of red.py
 
 def load_cogs(bot):
     if str(os.environ.get('IS_HEROKU')) == 'True':
-        defaults = ("alias", "customcom", "downloader", "economy", "general", "image", "mod", "streams", "trivia", "games", "streams", "markov", "identicon", "reactpoll", "wikipedia", "downloader", "alias", "duel", "gamelist", "dota", "general", "trivia", "steam", "sysinfo", "serverquotes", "roller", "science", "reactmenu", "economy", "owner", "customcom", "getfortune", "mod", "survey", "pokedex", "whoplays", "rpsls", "redportal", "rndstatus", "smartreact", "activitylog", "file", "stringutils")
+        defaults = ("alias", "customcom", "downloader", "economy", "general", "image", "mod", "streams", "trivia", "games", "markov", "identicon", "reactpoll", "wikipedia", "downloader", "alias", "duel", "gamelist", "dota", "general", "trivia", "steam", "sysinfo", "serverquotes", "roller", "science", "reactmenu", "economy", "owner", "customcom", "getfortune", "mod", "survey", "pokedex", "whoplays", "rpsls", "redportal", "rndstatus", "smartreact", "activitylog", "file", "stringutils")
     else:
-        defaults = ("alias", "audio", "customcom", "downloader", "economy", "general", "image", "mod", "streams", "trivia")
-    try:
-        registry = dataIO.load_json("data/red/cogs.json")
-    except:
-        registry = {}
+        defaults = ("alias", "audio", "customcom", "downloader", "economy", "general", "image", "mod", "streams", "trivia", "science", "file", "serverquotes", "games", "markov", "identicon", "reactpoll", "wikipedia", "downloader", "alias", "duel", "gamelist", "dota", "general", "trivia", "steam", "sysinfo", "serverquotes", "roller", "science", "reactmenu", "economy", "owner", "customcom", "getfortune", "mod", "survey", "pokedex", "whoplays", "rpsls", "redportal", "rndstatus", "smartreact", "activitylog", "stringutils")
+    # try:
+    #     registry = dataIO.load_json("data/red/cogs.json")
+    # except:
+    #     registry = {}
+
+    registry = {}
 
     bot.load_extension('cogs.owner')
     owner_cog = bot.get_cog('Owner')
@@ -601,7 +603,9 @@ def load_cogs(bot):
     extensions = owner_cog._list_cogs()
 
     if not registry:  # All default cogs enabled by default
+        print('Loading default cogs...')
         for ext in defaults:
+            print('Loading {}...'.format(ext))
             registry["cogs." + ext] = True
 
     for extension in extensions:
