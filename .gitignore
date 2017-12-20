@@ -5,7 +5,6 @@ data
 !data/trivia/*
 !data/audio/playlists/*
 !data/rpsls/weaknesses.json
-!data/rndstatus/*
 *.exe
 *.dll
 *.log
