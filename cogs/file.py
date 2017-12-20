@@ -47,7 +47,7 @@ class File:
     @checks.serverowner_or_permissions(administrator=True)
     async def list(self, ctx, server_id_or_substring=None):
         """List names of all logged file attachments for the server specified by id or name substring. Default is the current server."""
-        print('server_id_or_substring = ' + server_id_or_substring)
+        print('server_id_or_substring = ' + str(server_id_or_substring))
         if not server_id_or_substring:
             print('Defaulting to current server')
             server = ctx.message.server
