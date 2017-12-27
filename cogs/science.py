@@ -37,7 +37,7 @@ class Science:
 
     @commands.command()
     async def punch(self, user : discord.Member):
-        """I will puch anyone! >.<"""
+        """I will punch anyone! >.<"""
 
         # Command function
         await self.bot.say("ONE PUNCH! And " + user.mention + " is out! ლ(ಠ益ಠლ)")
