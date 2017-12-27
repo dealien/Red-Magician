@@ -1,15 +1,13 @@
 import discord
 from discord.ext import commands
-from collections import defaultdict, deque
+from collections import deque
 from datetime import datetime
 from .utils import checks
-from cogs.utils.chat_formatting import pagify, box
-from enum import Enum
+from cogs.utils.chat_formatting import box
 from __main__ import send_cmd_help
 import time
 import re
 import os
-from datetime import datetime
 
 def paginate_string(content):
     page = '```'
