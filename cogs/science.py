@@ -1,18 +1,9 @@
 import discord
 from discord.ext import commands
-from cogs.utils.dataIO import dataIO
-from collections import namedtuple, defaultdict, deque
-from datetime import datetime
-from copy import deepcopy
-from .utils import checks
+from collections import defaultdict, deque 
 from cogs.utils.chat_formatting import pagify, box
-from enum import Enum
 from __main__ import send_cmd_help
-from discord.ext import commands
-import time
-import re
 import os
-from datetime import datetime, timedelta
 
 def paginate_string(content):
     page = '```'
