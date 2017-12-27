@@ -118,7 +118,7 @@ class ServerQuotes:
         dataIO.save_json(JSON, self.quotes)
         if os.environ.get('IS_HEROKU') == 'True':
             self._upload_quotes()
-    
+
     if os.environ.get('IS_HEROKU') == 'True':
         def _upload_quotes(self):
             r = requests.post('https://api.myjson.com/bins', json=self.quotes)
