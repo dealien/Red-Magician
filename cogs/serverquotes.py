@@ -233,7 +233,6 @@ class ServerQuotes:
                 author = commands.MemberConverter(ctx, author).convert()
             except commands.errors.BadArgument:
                 author = author.strip(' \t\n\r\x0b\x0c-–—')  # whitespace + dashes
-                pass
 
         self._add_quote(ctx, author, message)
         await self.bot.say("Quote added.")
