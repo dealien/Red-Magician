@@ -1,18 +1,15 @@
 import discord
 from discord.ext import commands
-from cogs.utils.dataIO import dataIO
-from collections import namedtuple, defaultdict, deque
+from collections import defaultdict, deque
 from datetime import datetime
-from copy import deepcopy
 from .utils import checks
 from cogs.utils.chat_formatting import pagify, box
 from enum import Enum
 from __main__ import send_cmd_help
-from discord.ext import commands
 import time
 import re
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 
 def paginate_string(content):
     page = '```'
@@ -98,8 +95,8 @@ class File:
     @_file.command(pass_context=True)
     @checks.serverowner_or_permissions(administrator=True)
     async def info(self, ctx, server_id_or_substring=None):
-        """Show info about logged file attachments. 
-        If a server id or name substring is given, the result only includes information about the matching server(s). 
+        """Show info about logged file attachments.
+        If a server id or name substring is given, the result only includes information about the matching server(s).
         If no server is specified, info is given for all servers."""
         if not server_id_or_substring:
             servers = []
