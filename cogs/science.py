@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from collections import defaultdict, deque 
+from collections import defaultdict, deque
 from cogs.utils.chat_formatting import pagify, box
 from __main__ import send_cmd_help
 import os
