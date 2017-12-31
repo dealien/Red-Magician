@@ -462,6 +462,7 @@ def create_fast_start_scripts():
         pause = "\npause"
         ext = ".bat"
     else:
+        shebang = "#!/bin/bash\n"
         ccd = 'cd "$(dirname "$0")"\n'
         pause = "\nread -rsp $'Press enter to continue...\\n'"
         if not IS_MAC:
@@ -469,8 +470,8 @@ def create_fast_start_scripts():
         else:
             ext = ".command"
 
-    start_red             = ccd + start_red             + pause
-    start_red_autorestart = ccd + start_red_autorestart + pause
+    start_red             = shebang + ccd + start_red             + pause
+    start_red_autorestart = shebang + ccd + start_red_autorestart + pause
 
     files = {
         "start_red"             + ext : start_red,
@@ -478,7 +479,7 @@ def create_fast_start_scripts():
     }
 
     if not IS_WINDOWS:
-        files["start_launcher" + ext] = ccd + call
+        files["start_launcher" + ext] = shebang + ccd + call
 
     for filename, content in files.items():
         if not os.path.isfile(filename):
@@ -512,7 +513,7 @@ def main():
         if not is_git_installation:
             print("WARNING: It doesn't look like Red has been "
                   "installed with git.\nThis means that you won't "
-                  "be able to update and some features won't be working.\n"
+                  "be able to update and some features won't work.\n"
                   "A reinstallation is recommended. Follow the guide "
                   "properly this time:\n"
                   "https://twentysix26.github.io/Red-Docs/\n")
