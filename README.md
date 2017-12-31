@@ -1,6 +1,7 @@
 # Red Magician - A fully customizable Discord bot
 #### *Music, admin, trivia, fun commands and much more!*
 [<img src="https://img.shields.io/badge/discord-py-blue.svg">](https://github.com/Rapptz/discord.py) 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/da5a979642fc4fa99515b0f9969528eb)](https://www.codacy.com/app/dealien/Red-Magician?utm_source=github.com&utm_medium=referral&utm_content=dealien/Red-Magician&utm_campaign=badger)
 [![Build Status](https://travis-ci.org/dealien/Red-Magician.svg?branch=master)](https://travis-ci.org/dealien/Red-Magician)
 
 **Red Magician** is a fully modular bot – meaning all features and commands can be enabled/disabled to your liking, making it completely customizable. 
