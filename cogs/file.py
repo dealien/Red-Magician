@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-from collections import deque
 from datetime import datetime
 from .utils import checks
 from cogs.utils.chat_formatting import box
