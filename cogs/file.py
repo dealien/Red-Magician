@@ -1,9 +1,6 @@
 import discord
 from discord.ext import commands
-from collections import deque
-from datetime import datetime
 from .utils import checks
-from cogs.utils.chat_formatting import box
 from __main__ import send_cmd_help
 import time
 import re
@@ -200,7 +197,7 @@ class File:
         await self.bot.say('Number of files: {}'.format(files.len()))
         for file in files:
             print('Uploading {}'.format(file))
-            try: 
+            try:
                 await self.bot.upload(file)
             except discord.HTTPException:
                 await self.bot.say('I need the `Attach Files` permission to do this')
