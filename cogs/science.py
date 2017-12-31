@@ -1,7 +1,5 @@
 import discord
 from discord.ext import commands
-from collections import deque
-from cogs.utils.chat_formatting import box
 import os
 
 def paginate_string(content):

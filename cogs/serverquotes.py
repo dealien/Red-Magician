@@ -280,4 +280,3 @@ def setup(bot):
     check_file()
     n = ServerQuotes(bot)
     bot.add_cog(n)
-    
