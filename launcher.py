@@ -516,7 +516,7 @@ def main():
                   "be able to update and some features won't work.\n"
                   "A reinstallation is recommended. Follow the guide "
                   "properly this time:\n"
-                  "https://twentysix26.github.io/Red-Docs/\n")
+                  "https://dealien.github.io/Red-Magician-Docs/\n")
 
         if not has_git:
             print("WARNING: Git not found. This means that it's either not "
