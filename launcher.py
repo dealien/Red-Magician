@@ -24,8 +24,8 @@ except ImportError:
 
 REQS_DIR = "lib"
 sys.path.insert(0, REQS_DIR)
-REQS_TXT = "launcher-requirements.txt"
-REQS_NO_AUDIO_TXT = "launcher-requirements_no_audio.txt"
+REQS_TXT = "requirements.txt"
+REQS_NO_AUDIO_TXT = "requirements_no_audio.txt"
 FFMPEG_BUILDS_URL = "https://ffmpeg.zeranoe.com/builds/"
 
 INTRO = ("=======================\n"
