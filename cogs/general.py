@@ -177,7 +177,7 @@ class General:
 
     @commands.command(pass_context=True, no_pm=True)
     async def userinfo(self, ctx, *, user: discord.Member=None):
-        """Shows users's informations"""
+        """Shows information about a user"""
         author = ctx.message.author
         server = ctx.message.server
 
@@ -237,7 +237,7 @@ class General:
 
     @commands.command(pass_context=True, no_pm=True)
     async def serverinfo(self, ctx):
-        """Shows server's informations"""
+        """Shows information about a server"""
         server = ctx.message.server
         online = len([m.status for m in server.members
                       if m.status == discord.Status.online or
