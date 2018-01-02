@@ -6,7 +6,7 @@
 
 **Red Magician** is a fully modular bot – meaning all features and commands can be enabled/disabled to your liking, making it completely customizable. 
 This is also a *self-hosted bot* – meaning you will need to host and maintain your own instance. You can turn Red Magician into an admin bot, music bot, trivia bot, new best friend, or anything else you want! 
-[Installation is easy](https://twentysix26.github.io/Red-Docs/), and you do NOT need to know anything about coding! Aside from installation and updating, every part of the bot can be controlled from within Discord.
+[Installation is easy](https://dealien.github.io/Red-Magician-Docs/), and you do NOT need to know anything about coding! Aside from installation and updating, every part of the bot can be controlled from within Discord.
 
 The default set of modules includes and is not limited to:
 * Moderation features (kick/ban/softban/hackban, mod-log, filter, chat cleanup)
@@ -31,11 +31,11 @@ Feel free to take a [peek](https://cogs.red/) at the official cog database!
 # Installation
 
 The installation process is straightforward; all major platforms are supported: 
-* [Windows](https://twentysix26.github.io/Red-Docs/red_install_windows/)
-* [Linux](https://twentysix26.github.io/Red-Docs/red_install_linux/)
-* [macOS](https://twentysix26.github.io/Red-Docs/red_install_mac/)
+* [Windows](https://dealien.github.io/Red-Magician-Docs/red_install_windows/)
+* [Linux](https://dealien.github.io/Red-Magician-Docs/red_install_linux/)
+* [macOS](https://dealien.github.io/Red-Magician-Docs/red_install_mac/)
 
-Read the [getting started](https://twentysix26.github.io/Red-Docs/red_getting_started/) guide to quickly learn how to use Red.  
+Read the [getting started](https://dealien.github.io/Red-Magician-Docs/red_getting_started/) guide to quickly learn how to use Red.  
 
 Red Magician is built off of [discord.py](https://github.com/Rapptz/discord.py), a Discord API wrapper built for Python. Information about using discord.py and the Discord API can be found on the [discord.py documentation website](https://discordapp.com/developers/docs/intro). The same documentation can also comes [as a PDF](http://discordpy.readthedocs.io/en/latest/index.html). 
 

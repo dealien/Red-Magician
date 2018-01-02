@@ -2239,7 +2239,7 @@ def setup(bot):
         raise RuntimeError(
           "{}.\nConsult the guide for your operating system "
           "and do ALL the steps in order.\n"
-          "https://twentysix26.github.io/Red-Docs/\n"
+          "https://dealien.github.io/Red-Magician-Docs/\n"
           "".format(msg))
 
     n = Audio(bot, player=player)  # Praise 26

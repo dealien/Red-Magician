@@ -17,7 +17,7 @@ except ImportError:
     print("Discord.py is not installed.\n"
           "Consult the guide for your operating system "
           "and do ALL the steps in order.\n"
-          "https://twentysix26.github.io/Red-Docs/\n")
+          "https://dealien.github.io/Red-Magician-Docs/\n")
     sys.exit(1)
 
 from cogs.utils.settings import Settings
@@ -449,7 +449,7 @@ def interactive_setup(settings):
         if first_run:
             print("Red Magician - First run configuration\n")
             print("If you haven't already, create a new account:\n"
-                  "https://twentysix26.github.io/Red-Docs/red_guide_bot_accounts/"
+                  "https://dealien.github.io/Red-Magician-Docs/red_guide_bot_accounts/"
                   "#creating-a-new-bot-account")
             print("and obtain your bot's token like described.")
 
@@ -503,7 +503,7 @@ def interactive_setup(settings):
                   " keep Red online.\nAll commands will have to be issued through"
                   " Discord's chat, *this window will now be read only*.\n"
                   "Please read this guide for a good overview on how Red works:\n"
-                  "https://twentysix26.github.io/Red-Docs/red_getting_started/\n"
+                  "https://dealien.github.io/Red-Magician-Docs/red_getting_started/\n"
                   "Press enter to continue")
             input("\n")
 
