@@ -4,11 +4,14 @@ python:
 install:
 - pip install -r requirements.txt
 - pip install coverage
+- pip install codacy-coverage
 script:
 - python -m compileall ./red.py
 - python -m compileall ./cogs
 - python ./red.py --no-prompt --no-cogs --dry-run
 - coverage run ./red.py --no-prompt --dry-run
+- coverage xml
+- python-codacy-coverage -r coverage.xml
 cache: pip
 notifications:
   email: false
