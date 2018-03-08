@@ -576,9 +576,16 @@ def set_cog(cog, value):  # TODO: move this out of red.py
 
 def load_cogs(bot):
     if str(os.environ.get('IS_HEROKU')) == 'True':
-        defaults = ("alias", "customcom", "downloader", "economy", "general", "image", "mod", "streams", "trivia", "games", "markov", "identicon", "reactpoll", "wikipedia", "downloader", "alias", "duel", "gamelist", "dota", "general", "trivia", "steam", "sysinfo", "serverquotes", "roller", "science", "reactmenu", "economy", "owner", "customcom", "getfortune", "mod", "survey", "pokedex", "whoplays", "rpsls", "redportal", "rndstatus", "smartreact", "activitylog", "file", "stringutils")
+        defaults = ["alias", "customcom", "downloader", "economy", "general", "image", "mod", "streams", "trivia", "games", "markov", "identicon", "reactpoll", "wikipedia", "downloader", "alias", "duel", "gamelist", "dota", "general", "trivia", "steam", "sysinfo", "serverquotes", "roller", "science", "reactmenu", "economy", "owner", "customcom", "getfortune", "mod", "survey", "pokedex", "whoplays", "rpsls", "redportal", "rndstatus", "smartreact", "activitylog", "file", "stringutils"]
     else:
-        defaults = ("alias", "audio", "customcom", "downloader", "economy", "general", "image", "mod", "streams", "trivia", "science", "file", "serverquotes", "games", "markov", "identicon", "reactpoll", "wikipedia", "downloader", "alias", "duel", "gamelist", "dota", "general", "trivia", "steam", "sysinfo", "serverquotes", "roller", "science", "reactmenu", "economy", "owner", "customcom", "getfortune", "mod", "survey", "pokedex", "whoplays", "rpsls", "redportal", "rndstatus", "smartreact", "activitylog", "stringutils")
+        defaults = ["alias", "audio", "customcom", "downloader", "economy", "general", "image", "mod", "streams", "trivia", "science", "file", "serverquotes", "games", "markov", "identicon", "reactpoll", "wikipedia", "downloader", "alias", "duel", "gamelist", "dota", "general", "trivia", "steam", "sysinfo", "serverquotes", "roller", "science", "reactmenu", "economy", "owner", "customcom", "getfortune", "mod", "survey", "pokedex", "whoplays", "rpsls", "redportal", "rndstatus", "smartreact", "activitylog", "stringutils"]
+
+    if str(os.environ.get('BASIC_MODE')) == 'True':
+        for i in ["audio", "markov"]:
+            while i in defaults:
+                defaults.remove(i)
+
+    tuple(defaults)
     # try:
     #     registry = dataIO.load_json("data/red/cogs.json")
     # except:

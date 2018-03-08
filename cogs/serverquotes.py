@@ -154,7 +154,7 @@ class ServerQuotes:
 
     def _get_quote(self, ctx, author_or_num=None):
         sid = ctx.message.server.id
-        if type(author_or_num) is discord.Member:
+        if isinstance(author_or_num, discord.Member):
             return self._get_random_author_quote(ctx, author_or_num)
         if author_or_num:
             try:

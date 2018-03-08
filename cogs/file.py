@@ -41,7 +41,7 @@ class File:
         if not server_id_or_substring:
             print('Defaulting to current server')
             server = ctx.message.server
-        elif type(server_id_or_substring) == type(str()):
+        elif isinstance(server_id_or_substring, str):
             print('Input is a string')
             myservers = []
             for server in self.bot.servers:
@@ -97,12 +97,12 @@ class File:
             servers = []
             for server in self.bot.servers:
                 servers.append(server)
-        elif type(server_id_or_substring) is string:
+        elif isinstance(server_id_or_substring, str):
             myservers = []
             for server in self.bot.servers:
                 myservers.append(server)
             servers = [server for server in myservers if server_id_or_substring in str(server)]
-        elif type(server_id_or_substring) is int and len(server_id_or_substring) is 18:
+        elif isinstance(server_id_or_substring, int) and len(server_id_or_substring) is 18:
             myservers = []
             for server in self.bot.servers:
                 myservers.append(server)
@@ -159,7 +159,7 @@ class File:
         if not server_id_or_substring:
             print('Defaulting to current server')
             server = ctx.message.server
-        elif type(server_id_or_substring) == type(str()):
+        elif isinstance(server_id_or_substring, str):
             print('Input is a string')
             myservers = []
             for server in self.bot.servers:
