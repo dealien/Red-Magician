@@ -357,7 +357,7 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
         print("\ndealien's Server: https://discord.gg/SN4TvHJ")
 
         slackmessage = "*Bot Initialized*\n\nInfo:\n```Heroku: {}\nConnected to:\n  Servers: {}\n  Channels: {}\n  Users: {}\n{}: {}\n{}/{} active cogs with {} commands".format(settings.is_heroku, servers, channels, users, prefix_label, " ".join(bot.settings.prefixes), len(bot.cogs), total_cogs, len(bot.commands))
-        slacklog(m)
+        slacklog(slackmessage)
 
 
         await bot.get_cog('Owner').disable_commands()
