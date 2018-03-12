@@ -666,6 +666,8 @@ def main(bot):
     load_cogs(bot)
 
     if bot.settings._dry_run:
+        if settings.slack == True:
+            settings.slack_client.api_call("api.test")
         print("Quitting: dry run")
         bot._shutdown_mode = True
         exit(0)
