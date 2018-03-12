@@ -174,6 +174,8 @@ class InfoExtractor(object):
                                  width : height ratio as float.
                     * no_resume  The server does not support resuming the
                                  (HTTP or RTMP) download. Boolean.
+                    * downloader_options  A dictionary of downloader options as
+                                 described in FileDownloader
 
     url:            Final video URL.
     ext:            Video filename extension.
@@ -301,8 +303,9 @@ class InfoExtractor(object):
     There must be a key "entries", which is a list, an iterable, or a PagedList
     object, each element of which is a valid dictionary by this specification.
 
-    Additionally, playlists can have "title", "description" and "id" attributes
-    with the same semantics as videos (see above).
+    Additionally, playlists can have "id", "title", "description", "uploader",
+    "uploader_id", "uploader_url" attributes with the same semantics as videos
+    (see above).
 
 
     _type "multi_video" indicates that there are multiple videos that
@@ -494,6 +497,16 @@ class InfoExtractor(object):
                 self.to_screen('%s' % (note,))
             else:
                 self.to_screen('%s: %s' % (video_id, note))
+
+        # Some sites check X-Forwarded-For HTTP header in order to figure out
+        # the origin of the client behind proxy. This allows bypassing geo
+        # restriction by faking this header's value to IP that belongs to some
+        # geo unrestricted country. We will do so once we encounter any
+        # geo restriction error.
+        if self._x_forwarded_for_ip:
+            if 'X-Forwarded-For' not in headers:
+                headers['X-Forwarded-For'] = self._x_forwarded_for_ip
+
         if isinstance(url_or_request, compat_urllib_request.Request):
             url_or_request = update_Request(
                 url_or_request, data=data, headers=headers, query=query)
@@ -522,15 +535,6 @@ class InfoExtractor(object):
         # Strip hashes from the URL (#1038)
         if isinstance(url_or_request, (compat_str, str)):
             url_or_request = url_or_request.partition('#')[0]
-
-        # Some sites check X-Forwarded-For HTTP header in order to figure out
-        # the origin of the client behind proxy. This allows bypassing geo
-        # restriction by faking this header's value to IP that belongs to some
-        # geo unrestricted country. We will do so once we encounter any
-        # geo restriction error.
-        if self._x_forwarded_for_ip:
-            if 'X-Forwarded-For' not in headers:
-                headers['X-Forwarded-For'] = self._x_forwarded_for_ip
 
         urlh = self._request_webpage(url_or_request, video_id, note, errnote, fatal, data=data, headers=headers, query=query)
         if urlh is False:
@@ -1025,7 +1029,7 @@ class InfoExtractor(object):
                     part_of_series = e.get('partOfSeries') or e.get('partOfTVSeries')
                     if isinstance(part_of_series, dict) and part_of_series.get('@type') in ('TVSeries', 'Series', 'CreativeWorkSeries'):
                         info['series'] = unescapeHTML(part_of_series.get('name'))
-                elif item_type == 'Article':
+                elif item_type in ('Article', 'NewsArticle'):
                     info.update({
                         'timestamp': parse_iso8601(e.get('datePublished')),
                         'title': unescapeHTML(e.get('headline')),
@@ -1878,6 +1882,7 @@ class InfoExtractor(object):
                             'language': lang if lang not in ('mul', 'und', 'zxx', 'mis') else None,
                             'format_note': 'DASH %s' % content_type,
                             'filesize': filesize,
+                            'container': mimetype2ext(mime_type) + '_dash',
                         }
                         f.update(parse_codecs(representation_attrib.get('codecs')))
                         representation_ms_info = extract_multisegment_info(representation, adaption_set_ms_info)
@@ -2005,16 +2010,14 @@ class InfoExtractor(object):
                                     f['url'] = initialization_url
                                 f['fragments'].append({location_key(initialization_url): initialization_url})
                             f['fragments'].extend(representation_ms_info['fragments'])
-                        try:
-                            existing_format = next(
-                                fo for fo in formats
-                                if fo['format_id'] == representation_id)
-                        except StopIteration:
-                            full_info = formats_dict.get(representation_id, {}).copy()
-                            full_info.update(f)
-                            formats.append(full_info)
-                        else:
-                            existing_format.update(f)
+                        # According to [1, 5.3.5.2, Table 7, page 35] @id of Representation
+                        # is not necessarily unique within a Period thus formats with
+                        # the same `format_id` are quite possible. There are numerous examples
+                        # of such manifests (see https://github.com/rg3/youtube-dl/issues/15111,
+                        # https://github.com/rg3/youtube-dl/issues/13919)
+                        full_info = formats_dict.get(representation_id, {}).copy()
+                        full_info.update(f)
+                        formats.append(full_info)
                     else:
                         self.report_warning('Unknown MIME type %s in DASH manifest' % mime_type)
         return formats
@@ -2054,7 +2057,7 @@ class InfoExtractor(object):
             stream_timescale = int_or_none(stream.get('TimeScale')) or timescale
             stream_name = stream.get('Name')
             for track in stream.findall('QualityLevel'):
-                fourcc = track.get('FourCC')
+                fourcc = track.get('FourCC', 'AACL' if track.get('AudioTag') == '255' else None)
                 # TODO: add support for WVC1 and WMAP
                 if fourcc not in ('H264', 'AVC1', 'AACL'):
                     self.report_warning('%s is not a supported codec' % fourcc)
@@ -2247,9 +2250,10 @@ class InfoExtractor(object):
     def _extract_wowza_formats(self, url, video_id, m3u8_entry_protocol='m3u8_native', skip_protocols=[]):
         query = compat_urlparse.urlparse(url).query
         url = re.sub(r'/(?:manifest|playlist|jwplayer)\.(?:m3u8|f4m|mpd|smil)', '', url)
-        url_base = self._search_regex(
-            r'(?:(?:https?|rtmp|rtsp):)?(//[^?]+)', url, 'format url')
-        http_base_url = '%s:%s' % ('http', url_base)
+        mobj = re.search(
+            r'(?:(?:http|rtmp|rtsp)(?P<s>s)?:)?(?P<url>//[^?]+)', url)
+        url_base = mobj.group('url')
+        http_base_url = '%s%s:%s' % ('http', mobj.group('s') or '', url_base)
         formats = []
 
         def manifest_url(manifest):
@@ -2349,7 +2353,10 @@ class InfoExtractor(object):
                 for track in tracks:
                     if not isinstance(track, dict):
                         continue
-                    if track.get('kind') != 'captions':
+                    track_kind = track.get('kind')
+                    if not track_kind or not isinstance(track_kind, compat_str):
+                        continue
+                    if track_kind.lower() not in ('captions', 'subtitles'):
                         continue
                     track_url = urljoin(base_url, track.get('file'))
                     if not track_url:
@@ -2403,7 +2410,7 @@ class InfoExtractor(object):
                 formats.extend(self._extract_m3u8_formats(
                     source_url, video_id, 'mp4', entry_protocol='m3u8_native',
                     m3u8_id=m3u8_id, fatal=False))
-            elif ext == 'mpd':
+            elif source_type == 'dash' or ext == 'mpd':
                 formats.extend(self._extract_mpd_formats(
                     source_url, video_id, mpd_id=mpd_id, fatal=False))
             elif ext == 'smil':
