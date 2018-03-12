@@ -355,8 +355,11 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
             print(url)
 
         print("\ndealien's Server: https://discord.gg/SN4TvHJ")
-
-        slackmessage = "*Bot Initialized*\n\nInfo:\n```Heroku: {}\nConnected to:\n  Servers: {}\n  Channels: {}\n  Users: {}\n{}: {}\n{}/{} active cogs with {} commands".format(settings.is_heroku, servers, channels, users, prefix_label, " ".join(bot.settings.prefixes), len(bot.cogs), total_cogs, len(bot.commands))
+        if str(os.environ.get("IS_HEROKU")) == "True":
+            herokustatus = True
+        else:
+            herokustatus = False
+        slackmessage = "*Bot Initialized*\n```Heroku: {}\nConnected to:\n  Servers: {}\n  Channels: {}\n  Users: {}\n{}: {}\n{}/{} active cogs with {} commands```".format(herokustatus, servers, channels, users, prefix_label, " ".join(bot.settings.prefixes), len(bot.cogs), total_cogs, len(bot.commands))
         slacklog(slackmessage)
 
 
@@ -438,7 +441,6 @@ def interactive_setup(settings):
     print('IS_HEROKU = ' + str(os.environ.get('IS_HEROKU')))
 
     if str(os.environ.get('IS_HEROKU')) == 'True':
-        settings.is_heroku = True
         if len(str(os.environ.get('BOT_TOKEN'))) >= 50:
             settings.token = str(os.environ.get('BOT_TOKEN'))
             print('Bot token loaded from Heroku')
@@ -448,7 +450,6 @@ def interactive_setup(settings):
             settings.slack = True
             settings.slack_token = os.environ.get('SLACK_TOKEN')
             settings.slack_channel = os.environ.get('SLACK_CHANNEL')
-            settings.slack_client = SlackClient(os.environ.get('SLACK_TOKEN'))
             print('Slack token loaded from Heroku')
         else:
             print('Slack token not provided')
@@ -459,7 +460,6 @@ def interactive_setup(settings):
         settings.default_mod = 'Bot Moderator'
         settings.save_settings()
     else:
-        settings.is_heroku = False
         first_run = settings.bot_settings == settings.default_settings
 
         if first_run:
@@ -526,11 +526,10 @@ def interactive_setup(settings):
 def slacklog(m):
     if settings.slack == True:
         channel = settings.slack_channel
-        # slack_client = settings.slack_client
-        settings.slack_client.api_call("chat.postMessage", channel=channel, text=m, as_user=True)
+        slack_client = SlackClient(settings.slack_token)
+        slack_client.api_call("chat.postMessage", channel=channel, text=m, as_user=True)
         print("Slack message sent")
     else:
-        logger.log("Slack is not set up")
         print("Slack is not set up")
 
 def set_logger(bot):

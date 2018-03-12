@@ -21,8 +21,13 @@ class Settings:
             "PREFIXES": [],
             "default": {"ADMIN_ROLE": "Transistor",
                         "MOD_ROLE": "Process",
-                        "PREFIXES": []}
-                        }
+                        "PREFIXES": []
+                        },
+            "SLACK": None,
+            "SLACK_TOKEN": None,
+            "SLACK_CHANNEL": None
+            }
+
         self._memory_only = False
 
         if not dataIO.is_valid_json(self.path):
@@ -192,6 +197,7 @@ class Settings:
     def prefixes(self, value):
         assert isinstance(value, list)
         self.bot_settings["PREFIXES"] = value
+        self.save_settings()
 
     @property
     def slack(self):
@@ -200,6 +206,7 @@ class Settings:
     @slack.setter
     def slack(self, value):
         self.bot_settings["SLACK"] = value
+        self.save_settings()
 
     @property
     def slack_token(self):
@@ -208,6 +215,7 @@ class Settings:
     @slack_token.setter
     def slack_token(self, value):
         self.bot_settings["SLACK_TOKEN"] = value
+        self.save_settings()
 
     @property
     def slack_channel(self):
@@ -216,6 +224,7 @@ class Settings:
     @slack_channel.setter
     def slack_channel(self, value):
         self.bot_settings["SLACK_CHANNEL"] = value
+        self.save_settings()
 
     @property
     def default_admin(self):
