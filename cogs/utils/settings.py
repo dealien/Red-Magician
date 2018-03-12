@@ -194,6 +194,30 @@ class Settings:
         self.bot_settings["PREFIXES"] = value
 
     @property
+    def slack(self):
+        return self.bot_settings["SLACK"]
+
+    @slack.setter
+    def slack(self, value):
+        self.bot_settings["SLACK"] = value
+
+    @property
+    def slack_token(self):
+        return self.bot_settings["SLACK_TOKEN"]
+
+    @slack_token.setter
+    def slack_token(self, value):
+        self.bot_settings["SLACK_TOKEN"] = value
+
+    @property
+    def slack_channel(self):
+        return self.bot_settings["SLACK_CHANNEL"]
+
+    @slack_channel.setter
+    def slack_channel(self, value):
+        self.bot_settings["SLACK_CHANNEL"] = value
+
+    @property
     def default_admin(self):
         if "default" not in self.bot_settings:
             self.update_old_settings()

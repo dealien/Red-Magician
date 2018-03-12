@@ -528,8 +528,10 @@ def slacklog(m):
         channel = settings.slack_channel
         # slack_client = settings.slack_client
         settings.slack_client.api_call("chat.postMessage", channel=channel, text=m, as_user=True)
+        print("Slack message sent")
     else:
-        pass
+        logger.log("Slack is not set up")
+        print("Slack is not set up")
 
 def set_logger(bot):
     logger = logging.getLogger("red")
