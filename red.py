@@ -665,8 +665,13 @@ def main(bot):
     load_cogs(bot)
 
     if bot.settings._dry_run:
+        print("settings.slack = " + str(settings.slack))
         if settings.slack == True:
-            settings.slack_client.api_call("api.test")
+            slack_client = SlackClient(settings.slack_token)
+            channels = slack_client.api_call("channels.list")["channels"]
+            parsed = json.loads(json.dumps(channels[0]))
+            print(json.dumps(parsed, indent=4, sort_keys=False))
+            slack_client.api_call("chat.postMessage", channel=settings.slack_channel, text="Dry run Slack test successful!", as_user=True)
         print("Quitting: dry run")
         bot._shutdown_mode = True
         exit(0)
