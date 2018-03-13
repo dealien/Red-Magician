@@ -227,6 +227,13 @@ class Settings:
         self.save_settings()
 
     @property
+    def slack_credentials(self):
+        if (self.slack_token) and (self.slack_channel):
+            return (self.slack_token, self.slack_channel)
+        else:
+            return False
+
+    @property
     def default_admin(self):
         if "default" not in self.bot_settings:
             self.update_old_settings()

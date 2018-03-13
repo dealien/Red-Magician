@@ -440,21 +440,26 @@ def check_folders():
 def interactive_setup(settings):
     print('IS_HEROKU = ' + str(os.environ.get('IS_HEROKU')))
 
+    if not settings.slack_credentials:
+        print("Slack settings not provided in settings.json")
+        print("Attempting to load Slack settings from environment variables...")
+        if len(str(os.environ.get('SLACK_TOKEN'))) >= 10:
+            settings.slack = True
+            settings.slack_token = os.environ.get('SLACK_TOKEN')
+            settings.slack_channel = os.environ.get('SLACK_CHANNEL')
+            print('Slack settings successfully loaded from environment variables')
+        else:
+            print('Failed to load Slack settings from environment variables')
+            settings.slack = False
+            print('Slack status updates disabled')
+
+
     if str(os.environ.get('IS_HEROKU')) == 'True':
         if len(str(os.environ.get('BOT_TOKEN'))) >= 50:
             settings.token = str(os.environ.get('BOT_TOKEN'))
             print('Bot token loaded from Heroku')
         else:
             print('Please provide a valid bot token as the Heroku environment variable "BOT_TOKEN"')
-        if len(str(os.environ.get('SLACK_TOKEN'))) >= 76:
-            settings.slack = True
-            settings.slack_token = os.environ.get('SLACK_TOKEN')
-            settings.slack_channel = os.environ.get('SLACK_CHANNEL')
-            print('Slack token loaded from Heroku')
-        else:
-            print('Slack token not provided')
-            settings.slack = False
-            print('Slack status updates disabled')
         settings.prefixes = os.environ.get('PREFIX').split(',')
         settings.default_admin = 'Bot Commander'
         settings.default_mod = 'Bot Moderator'
@@ -666,7 +671,7 @@ def main(bot):
 
     if bot.settings._dry_run:
         print("settings.slack = " + str(settings.slack))
-        if settings.slack == True:
+        if settings.slack == 'True':
             slack_client = SlackClient(settings.slack_token)
             channels = slack_client.api_call("channels.list")["channels"]
             parsed = json.loads(json.dumps(channels[0]))
