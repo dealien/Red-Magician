@@ -443,7 +443,9 @@ def interactive_setup(settings):
     if not settings.slack_credentials:
         print("Slack settings not provided in settings.json")
         print("Attempting to load Slack settings from environment variables...")
-        if len(str(os.environ.get('SLACK_TOKEN'))) >= 10:
+        print("Environment variable 'IS_HEROKU' = " + str(os.environ.get('IS_HEROKU')))
+        print("Environment variable 'SLACK_TOKEN' length = " + str(len(str(os.environ.get('SLACK_TOKEN')))))
+        if (str(os.environ.get('IS_HEROKU')) == 'True') and (len(str(os.environ.get('SLACK_TOKEN'))) > 9):
             settings.slack = True
             settings.slack_token = os.environ.get('SLACK_TOKEN')
             settings.slack_channel = os.environ.get('SLACK_CHANNEL')
@@ -451,6 +453,8 @@ def interactive_setup(settings):
         else:
             print('Failed to load Slack settings from environment variables')
             settings.slack = False
+            settings.slack_token = None
+            settings.slack_channel = None
             print('Slack status updates disabled')
 
 
