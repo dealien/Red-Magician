@@ -75,9 +75,10 @@ class FFI(object):
         self._init_once_cache = {}
         self._cdef_version = None
         self._embedding = None
+        self._typecache = model.get_typecache(backend)
         if hasattr(backend, 'set_ffi'):
             backend.set_ffi(self)
-        for name in backend.__dict__:
+        for name in list(backend.__dict__):
             if name.startswith('RTLD_'):
                 setattr(self, name, getattr(backend, name))
         #
@@ -141,6 +142,13 @@ class FFI(object):
             self._function_caches.append(function_cache)
             self._libraries.append(lib)
         return lib
+
+    def dlclose(self, lib):
+        """Close a library obtained with ffi.dlopen().  After this call,
+        access to functions or variables from the library will fail
+        (possibly with a segmentation fault).
+        """
+        type(lib).__cffi_close__(lib)
 
     def _typeof_locked(self, cdecl):
         # call me with the lock!
@@ -393,12 +401,17 @@ class FFI(object):
             replace_with = ' ' + replace_with
         return self._backend.getcname(cdecl, replace_with)
 
-    def gc(self, cdata, destructor):
+    def gc(self, cdata, destructor, size=0):
         """Return a new cdata object that points to the same
         data.  Later, when this new cdata object is garbage-collected,
         'destructor(old_cdata_object)' will be called.
+
+        The optional 'size' gives an estimate of the size, used to
+        trigger the garbage collection more eagerly.  So far only used
+        on PyPy.  It tells the GC that the returned object keeps alive
+        roughly 'size' bytes of external memory.
         """
-        return self._backend.gcp(cdata, destructor)
+        return self._backend.gcp(cdata, destructor, size)
 
     def _get_cached_btype(self, type):
         assert self._lock.acquire(False) is False
@@ -764,7 +777,7 @@ def _load_backend_lib(backend, name, flags):
         if sys.platform != "win32":
             return backend.load_library(None, flags)
         name = "c"    # Windows: load_library(None) fails, but this works
-                      # (backward compatibility hack only)
+                      # on Python 2 (backward compatibility hack only)
     first_error = None
     if '.' in name or '/' in name or os.sep in name:
         try:
@@ -774,6 +787,9 @@ def _load_backend_lib(backend, name, flags):
     import ctypes.util
     path = ctypes.util.find_library(name)
     if path is None:
+        if name == "c" and sys.platform == "win32" and sys.version_info >= (3,):
+            raise OSError("dlopen(None) cannot work on Windows for Python 3 "
+                          "(see http://bugs.python.org/issue23606)")
         msg = ("ctypes.util.find_library() did not manage "
                "to locate a library called %r" % (name,))
         if first_error is not None:
@@ -889,6 +905,9 @@ def _make_ffi_library(ffi, libname, flags):
                 return addressof_var(name)
             raise AttributeError("cffi library has no function or "
                                  "global variable named '%s'" % (name,))
+        def __cffi_close__(self):
+            backendlib.close_lib()
+            self.__dict__.clear()
     #
     if libname is not None:
         try:
