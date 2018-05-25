@@ -331,9 +331,24 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
             herokustatus = True
         else:
             herokustatus = False
-        slackmessage = "*Bot Initialized*\n```Heroku: {}\nConnected to:\n  Servers: {}\n  Channels: {}\n  Users: {}\n{}: {}\n{}/{} active cogs with {} commands\n\nActive Cogs:\n{}```".format(herokustatus, servers, channels, users, prefix_label, " ".join(bot.settings.prefixes), len(bot.cogs), total_cogs, len(bot.commands), ", ".join(bot.cogs))
-        slacklog(slackmessage)
 
+        fields = [{"title":"Heroku Deployed","value":str(herokustatus),"short":True}]
+        fields.append({"title":prefix_label,"value":"{}".format(" ".join(bot.settings.prefixes)),"short":True})
+        fields.append({"title":"Cogs","value":"{}/{} active cogs with {} commands".format(len(bot.cogs), total_cogs, len(bot.commands)),"short":True})
+        fields.append({"title":"Active Cogs","value":"{}".format(", ".join(bot.cogs)),"short":False})
+        slackattachments = [{
+                            "fallback": "Red DiscordBot Initialized",
+                            "color": "good",
+                            "title": "Bot Initialized",
+                            "title_link": "https://github.com/dealien/Red-Magician",
+                            "text": "*Servers:* {}, *Channels:* {}, *Users:* {}".format(servers, channels, users),
+                            "fields": fields,
+                            "footer": str(bot.user),
+                            "footer_icon": "https://cdn.discordapp.com/app-icons/349363592627486740/eacdbc4e9c80e0db0e1160db529d45a4.png",
+                            "ts": datetime.datetime.now().timestamp()
+                        }]
+        # print(slackattachments)
+        slacklog(None, slackattachments, True)
 
         await bot.get_cog('Owner').disable_commands()
 
@@ -503,10 +518,10 @@ def interactive_setup(settings):
                   "Press enter to continue")
             input("\n")
 
-def slacklog(m):
+def slacklog(m, a=None, mk=True, au=False):
     if settings.slack == True:
         slack_client = SlackClient(settings.slack_token)
-        slack_client.api_call("chat.postMessage", channel=settings.slack_channel, text=m, as_user=True)
+        slack_client.api_call("chat.postMessage", channel=settings.slack_channel, text=m, attachments=a, mrkdwn=mk, as_user=au, username=str(bot.user).split("#", 1)[0], icon_url="https://cdn.discordapp.com/app-icons/349363592627486740/eacdbc4e9c80e0db0e1160db529d45a4.png")
         print("Slack message sent")
     else:
         print("Slack is not set up")

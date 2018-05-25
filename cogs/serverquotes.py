@@ -10,7 +10,6 @@ import json
 import requests
 import ast
 
-
 try:
     from tabulate import tabulate
 except Exception as e:
@@ -122,7 +121,6 @@ class ServerQuotes:
         print('New Myjson URL: ' + ast.literal_eval(r.text)['uri'])
         mc.set('json_url', ast.literal_eval(r.text)['uri'])
         print('New Myjson URL saved to MemCache')
-        slacklog('New Myjson URL: ' + ast.literal_eval(r.text)['uri'])
 
     def _quote_author(self, ctx, quote):
         if quote['author_id']:
