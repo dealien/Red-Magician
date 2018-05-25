@@ -28,48 +28,52 @@ if os.environ.get('IS_HEROKU') == 'True':
     servers = os.environ.get('MEMCACHIER_SERVERS', '').split(',')
     user = os.environ.get('MEMCACHIER_USERNAME', '')
     password = os.environ.get('MEMCACHIER_PASSWORD', '')
-    print('MemCache settings loaded')
+else:
+    servers = settings.mem_servers
+    user = settings.mem_username
+    password = settings.mem_password
 
-    mc = pylibmc.Client(servers, binary=True,
-                        username=user, password=password,
-                        behaviors={
-                          # Faster IO
-                          "tcp_nodelay": True,
+mc = pylibmc.Client(servers, binary=True,
+                    username=user, password=password,
+                    behaviors={
+                      # Faster IO
+                      "tcp_nodelay": True,
 
-                          # Keep connection alive
-                          'tcp_keepalive': True,
+                      # Keep connection alive
+                      'tcp_keepalive': True,
 
-                          # Timeout for set/get requests
-                          'connect_timeout': 2000, # ms
-                          'send_timeout': 750 * 1000, # us
-                          'receive_timeout': 750 * 1000, # us
-                          '_poll_timeout': 2000, # ms
+                      # Timeout for set/get requests
+                      'connect_timeout': 2000, # ms
+                      'send_timeout': 750 * 1000, # us
+                      'receive_timeout': 750 * 1000, # us
+                      '_poll_timeout': 2000, # ms
 
-                          # Better failover
-                          'ketama': True,
-                          'remove_failed': 1,
-                          'retry_timeout': 2,
-                          'dead_timeout': 30,
-                        })
+                      # Better failover
+                      'ketama': True,
+                      'remove_failed': 1,
+                      'retry_timeout': 2,
+                      'dead_timeout': 30,
+                    })
 
+print('MemCache settings loaded')
+print('MemCache URL: ' + str(mc.get('json_url')))
 
 class ServerQuotes:
 
     def __init__(self, bot):
         self.bot = bot
-        if os.environ.get('IS_HEROKU') == 'True':
-            myjson_url = mc.get('json_url')
-            print('myjson_url = ' + str(myjson_url))
-            if myjson_url is None:
-                myjson_url = os.environ.get('JSON_URL')
-            print('myjson_url = ' + myjson_url)
-            resp = requests.get(myjson_url)
-            data = json.loads(resp.text)
-            self.quotes = data
-            print('Quotes loaded from Myjson')
-        else:
-            self.quotes = dataIO.load_json(JSON)
-            print('Quotes loaded from ' + JSON)
+        myjson_url = mc.get('json_url')
+        print('myjson_url = ' + str(myjson_url))
+        resp = requests.get(myjson_url)
+        data = json.loads(resp.text)
+        self.quotes = data
+        print('Quotes loaded from Myjson')
+
+    def _load_quotes(self, ctx):
+        myjson_url = mc.get('json_url')
+        resp = requests.get(myjson_url)
+        data = json.loads(resp.text)
+        self.quotes = data
 
     def _get_random_quote(self, ctx):
         sid = ctx.message.server.id
@@ -80,16 +84,13 @@ class ServerQuotes:
 
     def _get_random_author_quote(self, ctx, author):
         sid = ctx.message.server.id
-
         if sid not in self.quotes or len(self.quotes[sid]) == 0:
             raise AssertionError("There are no quotes in this server!")
-
         if isinstance(author, discord.User):
             uid = author.id
             quotes = [(i, q) for i, q in enumerate(self.quotes[sid]) if q['author_id'] == uid]
         else:
             quotes = [(i, q) for i, q in enumerate(self.quotes[sid]) if q['author_name'] == author]
-
         if len(quotes) == 0:
             raise commands.BadArgument("There are no quotes by %s." % author)
         return randchoice(quotes)
@@ -99,34 +100,28 @@ class ServerQuotes:
         aid = ctx.message.author.id
         if sid not in self.quotes:
             self.quotes[sid] = []
-
         author_name = 'Unknown'
         author_id = None
-
         if isinstance(author, discord.User):
             author_name = author.display_name
             author_id = author.id
         elif isinstance(author, str):
             author_name = author
-
         quote = {'added_by': aid,
                  'author_name': author_name,
                  'author_id': author_id,
                  'text': escape_mass_mentions(message)}
-
         self.quotes[sid].append(quote)
         dataIO.save_json(JSON, self.quotes)
-        if os.environ.get('IS_HEROKU') == 'True':
-            self._upload_quotes()
+        self._upload_quotes()
 
-    if os.environ.get('IS_HEROKU') == 'True':
-        def _upload_quotes(self):
-            r = requests.post('https://api.myjson.com/bins', json=self.quotes)
-            print(r)
-            print('Quotes saved to Myjson')
-            print('New Myjson URL: ' + ast.literal_eval(r.text)['uri'])
-            mc.set('json_url', ast.literal_eval(r.text)['uri'])
-            print('New Myjson URL saved to MemCache')
+    def _upload_quotes(self):
+        r = requests.post('https://api.myjson.com/bins', json=self.quotes)
+        print(r)
+        print('Quotes saved to Myjson')
+        print('New Myjson URL: ' + ast.literal_eval(r.text)['uri'])
+        mc.set('json_url', ast.literal_eval(r.text)['uri'])
+        print('New Myjson URL saved to MemCache')
 
     def _quote_author(self, ctx, quote):
         if quote['author_id']:

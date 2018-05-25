@@ -19,10 +19,14 @@ class Settings:
             "PASSWORD": None,
             "OWNER": None,
             "PREFIXES": [],
-            "default": {"ADMIN_ROLE": "Transistor",
+            "default": {
+                        "ADMIN_ROLE": "Transistor",
                         "MOD_ROLE": "Process",
                         "PREFIXES": []
                         },
+            "MEMCACHIER_SERVERS": None,
+            "MEMCACHIER_USERNAME": None,
+            "MEMCACHIER_PASSWORD": None,
             "SLACK": None,
             "SLACK_TOKEN": None,
             "SLACK_CHANNEL": None
@@ -232,6 +236,33 @@ class Settings:
             return (self.slack_token, self.slack_channel)
         else:
             return False
+
+    @property
+    def mem_servers(self):
+        return self.bot_settings["MEMCACHIER_SERVERS"]
+
+    @mem_servers.setter
+    def mem_servers(self, value):
+        self.bot_settings["MEMCACHIER_SERVERS"] = value
+        self.save_settings()
+
+    @property
+    def mem_username(self):
+        return self.bot_settings["MEMCACHIER_USERNAME"]
+
+    @mem_username.setter
+    def mem_username(self, value):
+        self.bot_settings["MEMCACHIER_USERNAME"] = value
+        self.save_settings()
+
+    @property
+    def mem_password(self):
+        return self.bot_settings["MEMCACHIER_PASSWORD"]
+
+    @mem_password.setter
+    def mem_password(self, value):
+        self.bot_settings["MEMCACHIER_PASSWORD"] = value
+        self.save_settings()
 
     @property
     def default_admin(self):
