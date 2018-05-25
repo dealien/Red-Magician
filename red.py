@@ -505,9 +505,8 @@ def interactive_setup(settings):
 
 def slacklog(m):
     if settings.slack == True:
-        channel = settings.slack_channel
         slack_client = SlackClient(settings.slack_token)
-        slack_client.api_call("chat.postMessage", channel=channel, text=m, as_user=True)
+        slack_client.api_call("chat.postMessage", channel=settings.slack_channel, text=m, as_user=True)
         print("Slack message sent")
     else:
         print("Slack is not set up")
