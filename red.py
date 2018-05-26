@@ -42,34 +42,6 @@ from slackclient import SlackClient
 
 description = "Red Magician - A multifunction Discord bot by dealien"
 
-if os.environ.get('IS_HEROKU') == 'True':
-    servers = os.environ.get('MEMCACHIER_SERVERS', '').split(',')
-    user = os.environ.get('MEMCACHIER_USERNAME', '')
-    password = os.environ.get('MEMCACHIER_PASSWORD', '')
-    print('MemCache settings loaded')
-
-    mc = pylibmc.Client(servers, binary=True,
-                        username=user, password=password,
-                        behaviors={
-                          # Faster IO
-                          "tcp_nodelay": True,
-
-                          # Keep connection alive
-                          'tcp_keepalive': True,
-
-                          # Timeout for set/get requests
-                          'connect_timeout': 2000, # ms
-                          'send_timeout': 750 * 1000, # us
-                          'receive_timeout': 750 * 1000, # us
-                          '_poll_timeout': 2000, # ms
-
-                          # Better failover
-                          'ketama': True,
-                          'remove_failed': 1,
-                          'retry_timeout': 2,
-                          'dead_timeout': 30,
-                        })
-
 class Bot(commands.Bot):
     def __init__(self, *args, **kwargs):
 
@@ -359,9 +331,24 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
             herokustatus = True
         else:
             herokustatus = False
-        slackmessage = "*Bot Initialized*\n```Heroku: {}\nConnected to:\n  Servers: {}\n  Channels: {}\n  Users: {}\n{}: {}\n{}/{} active cogs with {} commands```".format(herokustatus, servers, channels, users, prefix_label, " ".join(bot.settings.prefixes), len(bot.cogs), total_cogs, len(bot.commands))
-        slacklog(slackmessage)
 
+        fields = [{"title":"Heroku Deployed","value":str(herokustatus),"short":True}]
+        fields.append({"title":prefix_label,"value":"{}".format(" ".join(bot.settings.prefixes)),"short":True})
+        fields.append({"title":"Cogs","value":"{}/{} active cogs with {} commands".format(len(bot.cogs), total_cogs, len(bot.commands)),"short":True})
+        fields.append({"title":"Active Cogs","value":"{}".format(", ".join(bot.cogs)),"short":False})
+        slackattachments = [{
+                            "fallback": "Red DiscordBot Initialized",
+                            "color": "good",
+                            "title": "Bot Initialized",
+                            "title_link": "https://github.com/dealien/Red-Magician",
+                            "text": "*Servers:* {}, *Channels:* {}, *Users:* {}".format(servers, channels, users),
+                            "fields": fields,
+                            "footer": str(bot.user),
+                            "footer_icon": "https://cdn.discordapp.com/app-icons/349363592627486740/eacdbc4e9c80e0db0e1160db529d45a4.png",
+                            "ts": datetime.datetime.now().timestamp()
+                        }]
+        # print(slackattachments)
+        slacklog(None, slackattachments, True)
 
         await bot.get_cog('Owner').disable_commands()
 
@@ -443,8 +430,7 @@ def interactive_setup(settings):
     if not settings.slack_credentials:
         print("Slack settings not provided in settings.json")
         print("Attempting to load Slack settings from environment variables...")
-        print("Environment variable 'IS_HEROKU' = " + str(os.environ.get('IS_HEROKU')))
-        print("Environment variable 'SLACK_TOKEN' length = " + str(len(str(os.environ.get('SLACK_TOKEN')))))
+        # print("Environment variable 'SLACK_TOKEN' length = " + str(len(str(os.environ.get('SLACK_TOKEN')))))
         if (str(os.environ.get('IS_HEROKU')) == 'True') and (len(str(os.environ.get('SLACK_TOKEN'))) > 9):
             settings.slack = True
             settings.slack_token = os.environ.get('SLACK_TOKEN')
@@ -532,11 +518,10 @@ def interactive_setup(settings):
                   "Press enter to continue")
             input("\n")
 
-def slacklog(m):
+def slacklog(m, a=None, mk=True, au=False):
     if settings.slack == True:
-        channel = settings.slack_channel
         slack_client = SlackClient(settings.slack_token)
-        slack_client.api_call("chat.postMessage", channel=channel, text=m, as_user=True)
+        slack_client.api_call("chat.postMessage", channel=settings.slack_channel, text=m, attachments=a, mrkdwn=mk, as_user=au, username=str(bot.user).split("#", 1)[0], icon_url="https://cdn.discordapp.com/app-icons/349363592627486740/eacdbc4e9c80e0db0e1160db529d45a4.png")
         print("Slack message sent")
     else:
         print("Slack is not set up")
@@ -674,13 +659,13 @@ def main(bot):
     load_cogs(bot)
 
     if bot.settings._dry_run:
-        print("settings.slack = " + str(settings.slack))
-        if settings.slack == 'True':
-            slack_client = SlackClient(settings.slack_token)
-            channels = slack_client.api_call("channels.list")["channels"]
-            parsed = json.loads(json.dumps(channels[0]))
-            print(json.dumps(parsed, indent=4, sort_keys=False))
-            slack_client.api_call("chat.postMessage", channel=settings.slack_channel, text="Dry run Slack test successful!", as_user=True)
+        # print("settings.slack = " + str(settings.slack))
+        # if settings.slack == 'True':
+        #     slack_client = SlackClient(settings.slack_token)
+        #     channels = slack_client.api_call("channels.list")["channels"]
+        #     parsed = json.loads(json.dumps(channels[0]))
+        #     print(json.dumps(parsed, indent=4, sort_keys=False))
+        #     slack_client.api_call("chat.postMessage", channel=settings.slack_channel, text="Dry run Slack test successful!", as_user=True)
         print("Quitting: dry run")
         bot._shutdown_mode = True
         exit(0)
