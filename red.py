@@ -304,6 +304,9 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
 
         owner = await set_bot_owner()
 
+        settings.bot_user = str(bot.user)
+        settings.save_settings()
+
         print("--------------------------")
         print("Red Magician - Discord Bot")
         print("--------------------------")
@@ -348,7 +351,8 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
                             "ts": datetime.datetime.now().timestamp()
                         }]
         # print(slackattachments)
-        slacklog(None, slackattachments, True)
+        SlackClient(settings.slack_token).api_call("chat.postMessage", channel=settings.slack_channel, attachments=slackattachments, mrkdwn=True, as_user=False, username=str(settings.bot_user).split("#", 1)[0], icon_url="https://cdn.discordapp.com/app-icons/349363592627486740/eacdbc4e9c80e0db0e1160db529d45a4.png")
+        print("Slack message sent")
 
         await bot.get_cog('Owner').disable_commands()
 
@@ -442,6 +446,7 @@ def interactive_setup(settings):
             settings.slack_token = None
             settings.slack_channel = None
             print('Slack status updates disabled')
+        dataIO.save_json("data/slack/settings.json", {"SLACK_TOKEN":settings.slack_token,"SLACK_CHANNEL":settings.slack_channel})
 
 
     if str(os.environ.get('IS_HEROKU')) == 'True':
@@ -517,14 +522,6 @@ def interactive_setup(settings):
                   "https://dealien.github.io/Red-Magician-Docs/red_getting_started/\n"
                   "Press enter to continue")
             input("\n")
-
-def slacklog(m, a=None, mk=True, au=False):
-    if settings.slack == True:
-        slack_client = SlackClient(settings.slack_token)
-        slack_client.api_call("chat.postMessage", channel=settings.slack_channel, text=m, attachments=a, mrkdwn=mk, as_user=au, username=str(bot.user).split("#", 1)[0], icon_url="https://cdn.discordapp.com/app-icons/349363592627486740/eacdbc4e9c80e0db0e1160db529d45a4.png")
-        print("Slack message sent")
-    else:
-        print("Slack is not set up")
 
 def set_logger(bot):
     logger = logging.getLogger("red")

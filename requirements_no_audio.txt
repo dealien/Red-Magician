@@ -5,3 +5,4 @@ imgurpython
 termcolor
 tabulate
 slackclient
+pprint
