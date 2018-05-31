@@ -27,40 +27,6 @@ print('Path to serverquotes quote list: ' + PATH)
 
 __version__ = '1.5.2'
 
-if os.environ.get('IS_HEROKU') == 'True':
-    servers = os.environ.get('MEMCACHIER_SERVERS', '').split(',')
-    user = os.environ.get('MEMCACHIER_USERNAME', '')
-    password = os.environ.get('MEMCACHIER_PASSWORD', '')
-else:
-    servers = settings.mem_servers
-    user = settings.mem_username
-    password = settings.mem_password
-
-mc = pylibmc.Client(servers, binary=True,
-                    username=user, password=password,
-                    behaviors={
-                      # Faster IO
-                      "tcp_nodelay": True,
-
-                      # Keep connection alive
-                      'tcp_keepalive': True,
-
-                      # Timeout for set/get requests
-                      'connect_timeout': 2000, # ms
-                      'send_timeout': 750 * 1000, # us
-                      'receive_timeout': 750 * 1000, # us
-                      '_poll_timeout': 2000, # ms
-
-                      # Better failover
-                      'ketama': True,
-                      'remove_failed': 1,
-                      'retry_timeout': 2,
-                      'dead_timeout': 30,
-                    })
-
-print('MemCache settings loaded')
-print('MemCache URL: ' + str(mc.get('json_url')))
-
 class ServerQuotes:
 
     def __init__(self, bot):
@@ -75,6 +41,40 @@ class ServerQuotes:
         # TODO: Properly integrate settings.py instead of using this imprecise work-around
         self.settings_path = "data/red/settings.json"
         self.settings = dataIO.load_json(self.settings_path)
+
+        if os.environ.get('IS_HEROKU') == 'True':
+            servers = os.environ.get('MEMCACHIER_SERVERS', '').split(',')
+            user = os.environ.get('MEMCACHIER_USERNAME', '')
+            password = os.environ.get('MEMCACHIER_PASSWORD', '')
+        else:
+            servers = self.settings.mem_servers
+            user = self.settings.mem_username
+            password = self.settings.mem_password
+
+        mc = pylibmc.Client(servers, binary=True,
+                            username=user, password=password,
+                            behaviors={
+                              # Faster IO
+                              "tcp_nodelay": True,
+
+                              # Keep connection alive
+                              'tcp_keepalive': True,
+
+                              # Timeout for set/get requests
+                              'connect_timeout': 2000, # ms
+                              'send_timeout': 750 * 1000, # us
+                              'receive_timeout': 750 * 1000, # us
+                              '_poll_timeout': 2000, # ms
+
+                              # Better failover
+                              'ketama': True,
+                              'remove_failed': 1,
+                              'retry_timeout': 2,
+                              'dead_timeout': 30,
+                            })
+        
+        print('MemCache settings loaded')
+        print('MemCache URL: ' + str(mc.get('json_url')))
 
 
     def _load_quotes(self, ctx):
