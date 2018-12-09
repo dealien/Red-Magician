@@ -71,5 +71,6 @@ target/
 *.log
 data/*
 !data/trivia/*
+data/trivia/settings.json
 !data/audio/playlists/*
 !data/rpsls/weaknesses.json
