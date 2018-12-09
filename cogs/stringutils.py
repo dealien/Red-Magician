@@ -18,7 +18,7 @@ class StringFuncs:
 
     @commands.group(name="string", pass_context=True)
     async def _string(self, ctx):
-        """Logged file operations"""
+        """Various string manipulations"""
         if ctx.invoked_subcommand is None:
             await send_cmd_help(ctx)
 
