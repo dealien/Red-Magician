@@ -14,8 +14,9 @@ import datetime
 import glob
 import os
 import aiohttp
+from printlog import *
 
-log = logging.getLogger("red.owner")
+log = PrintLog('red.owner')
 
 
 class CogNotFoundError(Exception):

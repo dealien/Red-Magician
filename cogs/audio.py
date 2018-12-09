@@ -18,11 +18,12 @@ import math
 import time
 import inspect
 import subprocess
+from printlog import *
+
+log = PrintLog('red.audio')
 
 __author__ = "tekulvw"
 __version__ = "0.1.1"
-
-log = logging.getLogger("red.audio")
 
 try:
     import youtube_dl

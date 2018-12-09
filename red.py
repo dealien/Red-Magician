@@ -554,6 +554,8 @@ def set_logger(bot):
         stdout_handler.setLevel(logging.INFO)
         logger.setLevel(logging.INFO)
 
+    if os.path.exists('data/red/red.log'):  # Removes existing log file to allow a clean start
+        os.remove('data/red/red.log')
     fhandler = logging.handlers.RotatingFileHandler(
         filename='data/red/red.log', encoding='utf-8', mode='a',
         maxBytes=10 ** 7, backupCount=5)

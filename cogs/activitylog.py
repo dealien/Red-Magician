@@ -8,6 +8,10 @@ import asyncio
 import aiohttp
 from functools import partial
 from enum import Enum
+from printlog import *
+
+log = PrintLog('red.activitylog')
+
 
 __version__ = '1.3.0'
 
