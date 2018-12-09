@@ -81,7 +81,6 @@ class File:
         B = ['.log', '.json']
         blacklist = re.compile('|'.join([re.escape(word) for word in B]))
         files_ = []
-        print('##############################################')
         for path, subdirs, filelist in os.walk(
                 os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/data/activitylogger/" + str(server.id)):
             for file in filelist:
