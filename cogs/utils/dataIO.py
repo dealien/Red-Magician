@@ -47,7 +47,7 @@ class DataIO():
         return data
 
     def _save_json(self, filename, data):
-        with open(filename, encoding='utf-8', mode="w") as f:
+        with open(filename, encoding='utf-8', mode="w+") as f:
             json.dump(data, f, indent=4,sort_keys=True,
                 separators=(',',' : '))
         return data
