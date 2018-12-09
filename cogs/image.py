@@ -28,7 +28,7 @@ class Image:
             await self.bot.send_cmd_help(ctx)
 
     @_imgur.command(pass_context=True, name="random")
-    async def imgur_random(self, ctx, *, term: str=None):
+    async def imgur_random(self, ctx, *, term: str = None):
         """Retrieves a random image from Imgur
 
         Search terms can be specified"""
@@ -76,7 +76,7 @@ class Image:
                 await self.bot.say("Your search terms gave no results.")
 
     @_imgur.command(pass_context=True, name="subreddit")
-    async def imgur_subreddit(self, ctx, subreddit: str, sort_type: str="top", window: str="day"):
+    async def imgur_subreddit(self, ctx, subreddit: str, sort_type: str = "top", window: str = "day"):
         """Gets images from the specified subreddit section
 
         Sort types: new, top

@@ -58,45 +58,46 @@ NUM_ENC = "\N{COMBINING ENCLOSING KEYCAP}"
 
 
 class SMReel(Enum):
-    cherries  = "\N{CHERRIES}"
-    cookie    = "\N{COOKIE}"
-    two       = "\N{DIGIT TWO}" + NUM_ENC
-    flc       = "\N{FOUR LEAF CLOVER}"
-    cyclone   = "\N{CYCLONE}"
+    cherries = "\N{CHERRIES}"
+    cookie = "\N{COOKIE}"
+    two = "\N{DIGIT TWO}" + NUM_ENC
+    flc = "\N{FOUR LEAF CLOVER}"
+    cyclone = "\N{CYCLONE}"
     sunflower = "\N{SUNFLOWER}"
-    six       = "\N{DIGIT SIX}" + NUM_ENC
-    mushroom  = "\N{MUSHROOM}"
-    heart     = "\N{HEAVY BLACK HEART}"
+    six = "\N{DIGIT SIX}" + NUM_ENC
+    mushroom = "\N{MUSHROOM}"
+    heart = "\N{HEAVY BLACK HEART}"
     snowflake = "\N{SNOWFLAKE}"
 
+
 PAYOUTS = {
-    (SMReel.two, SMReel.two, SMReel.six) : {
-        "payout" : lambda x: x * 2500 + x,
-        "phrase" : "JACKPOT! 226! Your bid has been multiplied * 2500!"
+    (SMReel.two, SMReel.two, SMReel.six): {
+        "payout": lambda x: x * 2500 + x,
+        "phrase": "JACKPOT! 226! Your bid has been multiplied * 2500!"
     },
-    (SMReel.flc, SMReel.flc, SMReel.flc) : {
-        "payout" : lambda x: x + 1000,
-        "phrase" : "4LC! +1000!"
+    (SMReel.flc, SMReel.flc, SMReel.flc): {
+        "payout": lambda x: x + 1000,
+        "phrase": "4LC! +1000!"
     },
-    (SMReel.cherries, SMReel.cherries, SMReel.cherries) : {
-        "payout" : lambda x: x + 800,
-        "phrase" : "Three cherries! +800!"
+    (SMReel.cherries, SMReel.cherries, SMReel.cherries): {
+        "payout": lambda x: x + 800,
+        "phrase": "Three cherries! +800!"
     },
-    (SMReel.two, SMReel.six) : {
-        "payout" : lambda x: x * 4 + x,
-        "phrase" : "2 6! Your bid has been multiplied * 4!"
+    (SMReel.two, SMReel.six): {
+        "payout": lambda x: x * 4 + x,
+        "phrase": "2 6! Your bid has been multiplied * 4!"
     },
-    (SMReel.cherries, SMReel.cherries) : {
-        "payout" : lambda x: x * 3 + x,
-        "phrase" : "Two cherries! Your bid has been multiplied * 3!"
+    (SMReel.cherries, SMReel.cherries): {
+        "payout": lambda x: x * 3 + x,
+        "phrase": "Two cherries! Your bid has been multiplied * 3!"
     },
-    "3 symbols" : {
-        "payout" : lambda x: x + 500,
-        "phrase" : "Three symbols! +500!"
+    "3 symbols": {
+        "payout": lambda x: x + 500,
+        "phrase": "Three symbols! +500!"
     },
-    "2 symbols" : {
-        "payout" : lambda x: x * 2 + x,
-        "phrase" : "Two consecutive symbols! Your bid has been multiplied * 2!"
+    "2 symbols": {
+        "payout": lambda x: x * 2 + x,
+        "phrase": "Two consecutive symbols! Your bid has been multiplied * 2!"
     },
 }
 
@@ -244,7 +245,7 @@ class Bank:
         account["created_at"] = datetime.strptime(account["created_at"],
                                                   "%Y-%m-%d %H:%M:%S")
         Account = namedtuple("Account", "id name balance "
-                             "created_at server member")
+                                        "created_at server member")
         return Account(**account)
 
     def _save_bank(self):
@@ -321,7 +322,7 @@ class Economy:
                                " Twentysix bank.".format(author.mention))
 
     @_bank.command(pass_context=True)
-    async def balance(self, ctx, user: discord.Member=None):
+    async def balance(self, ctx, user: discord.Member = None):
         """Shows balance of user.
 
         Defaults to yours."""
@@ -400,7 +401,7 @@ class Economy:
 
     @_bank.command(pass_context=True, no_pm=True)
     @checks.serverowner_or_permissions(administrator=True)
-    async def reset(self, ctx, confirmation: bool=False):
+    async def reset(self, ctx, confirmation: bool = False):
         """Deletes all server's bank accounts"""
         if confirmation is False:
             await self.bot.say("This will delete all bank accounts on "
@@ -420,10 +421,10 @@ class Economy:
         if self.bank.account_exists(author):
             if id in self.payday_register[server.id]:
                 seconds = abs(self.payday_register[server.id][
-                              id] - int(time.perf_counter()))
+                                  id] - int(time.perf_counter()))
                 if seconds >= self.settings[server.id]["PAYDAY_TIME"]:
                     self.bank.deposit_credits(author, self.settings[
-                                              server.id]["PAYDAY_CREDITS"])
+                        server.id]["PAYDAY_CREDITS"])
                     self.payday_register[server.id][
                         id] = int(time.perf_counter())
                     await self.bot.say(
@@ -440,7 +441,7 @@ class Economy:
             else:
                 self.payday_register[server.id][id] = int(time.perf_counter())
                 self.bank.deposit_credits(author, self.settings[
-                                          server.id]["PAYDAY_CREDITS"])
+                    server.id]["PAYDAY_CREDITS"])
                 await self.bot.say(
                     "{} Here, take some credits. Enjoy! (+{} credits!)".format(
                         author.mention,
@@ -448,7 +449,7 @@ class Economy:
         else:
             await self.bot.say("{} You need an account to receive credits."
                                " Type `{}bank register` to open one.".format(
-                                   author.mention, ctx.prefix))
+                author.mention, ctx.prefix))
 
     @commands.group(pass_context=True)
     async def leaderboard(self, ctx):
@@ -459,7 +460,7 @@ class Economy:
             await ctx.invoke(self._server_leaderboard)
 
     @leaderboard.command(name="server", pass_context=True)
-    async def _server_leaderboard(self, ctx, top: int=10):
+    async def _server_leaderboard(self, ctx, top: int = 10):
         """Prints out the server's leaderboard
 
         Defaults to top 10"""
@@ -469,7 +470,7 @@ class Economy:
             top = 10
         bank_sorted = sorted(self.bank.get_server_accounts(server),
                              key=lambda x: x.balance, reverse=True)
-        bank_sorted = [a for a in bank_sorted if a.member] #  exclude users who left
+        bank_sorted = [a for a in bank_sorted if a.member]  # exclude users who left
         if len(bank_sorted) < top:
             top = len(bank_sorted)
         topten = bank_sorted[:top]
@@ -487,7 +488,7 @@ class Economy:
             await self.bot.say("There are no accounts in the bank.")
 
     @leaderboard.command(name="global")
-    async def _global_leaderboard(self, top: int=10):
+    async def _global_leaderboard(self, top: int = 10):
         """Prints out the global leaderboard
 
         Defaults to top 10"""
@@ -495,7 +496,7 @@ class Economy:
             top = 10
         bank_sorted = sorted(self.bank.get_all_accounts(),
                              key=lambda x: x.balance, reverse=True)
-        bank_sorted = [a for a in bank_sorted if a.member] #  exclude users who left
+        bank_sorted = [a for a in bank_sorted if a.member]  # exclude users who left
         unique_accounts = []
         for acc in bank_sorted:
             if not self.already_in_list(unique_accounts, acc):
@@ -567,15 +568,15 @@ class Economy:
         reels = []
         self.slot_register[author.id] = datetime.utcnow()
         for i in range(3):
-            default_reel.rotate(random.randint(-999, 999)) # weeeeee
-            new_reel = deque(default_reel, maxlen=3) # we need only 3 symbols
-            reels.append(new_reel)                   # for each reel
+            default_reel.rotate(random.randint(-999, 999))  # weeeeee
+            new_reel = deque(default_reel, maxlen=3)  # we need only 3 symbols
+            reels.append(new_reel)  # for each reel
         rows = ((reels[0][0], reels[1][0], reels[2][0]),
                 (reels[0][1], reels[1][1], reels[2][1]),
                 (reels[0][2], reels[1][2], reels[2][2]))
 
-        slot = "~~\n~~" # Mobile friendly
-        for i, row in enumerate(rows): # Let's build the slot to show
+        slot = "~~\n~~"  # Mobile friendly
+        for i, row in enumerate(rows):  # Let's build the slot to show
             sign = "  "
             if i == 1:
                 sign = ">"
@@ -585,8 +586,8 @@ class Economy:
         if not payout:
             # Checks for two-consecutive-symbols special rewards
             payout = PAYOUTS.get((rows[1][0], rows[1][1]),
-                     PAYOUTS.get((rows[1][1], rows[1][2]))
-                                )
+                                 PAYOUTS.get((rows[1][1], rows[1][2]))
+                                 )
         if not payout:
             # Still nothing. Let's check for 3 generic same symbols
             # or 2 consecutive symbols
@@ -683,8 +684,8 @@ class Economy:
     def display_time(self, seconds, granularity=2):
         intervals = (  # Source: http://stackoverflow.com/a/24542445
             ('weeks', 604800),  # 60 * 60 * 24 * 7
-            ('days', 86400),    # 60 * 60 * 24
-            ('hours', 3600),    # 60 * 60
+            ('days', 86400),  # 60 * 60 * 24
+            ('hours', 3600),  # 60 * 60
             ('minutes', 60),
             ('seconds', 1),
         )
@@ -708,7 +709,6 @@ def check_folders():
 
 
 def check_files():
-
     f = "data/economy/settings.json"
     if not dataIO.is_valid_json(f):
         print("Creating default economy's settings.json...")

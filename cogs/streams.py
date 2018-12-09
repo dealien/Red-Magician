@@ -293,7 +293,7 @@ class Streams:
 
     @streamset.command()
     @checks.is_owner()
-    async def twitchtoken(self, token : str):
+    async def twitchtoken(self, token: str):
         """Sets the Client-ID for Twitch
 
         https://blog.twitch.tv/client-id-required-for-kraken-api-calls-afbb8e95f843"""
@@ -303,7 +303,7 @@ class Streams:
 
     @streamset.command(pass_context=True, no_pm=True)
     @checks.admin()
-    async def mention(self, ctx, *, mention_type : str):
+    async def mention(self, ctx, *, mention_type: str):
         """Sets mentions for stream alerts
 
         Types: everyone, here, none"""
@@ -465,7 +465,7 @@ class Streams:
         embed = discord.Embed(title=livestream["media_status"], url=url)
         embed.set_author(name=livestream["media_name"])
         embed.add_field(name="Followers", value=channel["followers"])
-        #embed.add_field(name="Views", value=channel["views"])
+        # embed.add_field(name="Views", value=channel["views"])
         embed.set_thumbnail(url=base_url + channel["user_logo"])
         if livestream["media_thumbnail"]:
             embed.set_image(url=base_url + livestream["media_thumbnail"] + self.rnd_attr())
@@ -562,9 +562,9 @@ class Streams:
         while self == self.bot.get_cog("Streams"):
             save = False
 
-            streams = ((self.twitch_streams,  self.twitch_online),
-                       (self.hitbox_streams,  self.hitbox_online),
-                       (self.mixer_streams,    self.mixer_online),
+            streams = ((self.twitch_streams, self.twitch_online),
+                       (self.hitbox_streams, self.hitbox_online),
+                       (self.mixer_streams, self.mixer_online),
                        (self.picarto_streams, self.picarto_online))
 
             for streams_list, parser in streams:

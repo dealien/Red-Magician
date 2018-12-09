@@ -6,6 +6,7 @@ import time
 import re
 import os
 
+
 def paginate_string(content):
     page = '```'
     pages = []
@@ -19,8 +20,12 @@ def paginate_string(content):
     pages.append(page)
     return pages
 
-def get_size(start_path = '.'):
-    return sum(os.path.getsize(os.path.join(dirpath,filename)) for dirpath, dirnames, filenames in os.walk(start_path) for filename in filenames)
+
+def get_size(start_path='.'):
+    return sum(
+        os.path.getsize(os.path.join(dirpath, filename)) for dirpath, dirnames, filenames in os.walk(start_path) for
+        filename in filenames)
+
 
 class File:
     """A cog for various file commands."""
@@ -51,7 +56,8 @@ class File:
             for i in servers:
                 print(str(i))
             if len(servers) > 1:
-                raise Exception('Error: ' + server_id_or_substring + ' matched multiple servers. Please either provide more of the name or the server id.')
+                raise Exception(
+                    'Error: ' + server_id_or_substring + ' matched multiple servers. Please either provide more of the name or the server id.')
             if len(servers) is 0:
                 raise Exception('Error: ' + server_id_or_substring + ' did not match any servers.')
             server = servers[0]
@@ -66,7 +72,9 @@ class File:
         print('Server ID: ' + str(server.id))
         # print('Server: ' + str(server.name))
         # print('Server ID: ' + str(server.id))
-        await self.bot.say('These are the names of all the logged attachments for ' + str(server.name) + ' (Server ID: ' + str(server.id) + ')')
+        await self.bot.say(
+            'These are the names of all the logged attachments for ' + str(server.name) + ' (Server ID: ' + str(
+                server.id) + ')')
         B = ['.log', '.json']
         blacklist = re.compile('|'.join([re.escape(word) for word in B]))
         files_ = []
@@ -109,7 +117,8 @@ class File:
             servers = [server for server in myservers if server_id_or_substring in server.id]
         else:
             # await send_cmd_help(ctx)
-            await self.bot.say('Error: optional server argument must be either a partial name of a server or a server id.')
+            await self.bot.say(
+                'Error: optional server argument must be either a partial name of a server or a server id.')
         print(servers)
         B = ['.log', '.json']
         blacklist = re.compile('|'.join([re.escape(word) for word in B]))
@@ -138,14 +147,17 @@ class File:
             totalfilesize += get_size("/home/red/Red-DiscordBot/data/activitylogger/" + server.id)
             filecounts.append(str(len(files)))
             imagefilecounts.append(str(len(imagefiles)))
-            filesizes.append(str(round(get_size("/home/red/Red-DiscordBot/data/activitylogger/" + server.id)/1000000, 3)) + ' MB')
+            filesizes.append(
+                str(round(get_size("/home/red/Red-DiscordBot/data/activitylogger/" + server.id) / 1000000, 3)) + ' MB')
 
         lines = []
         i = 0
         for server in servers:
-            lines.append(str(server.name) + ':\n  File Count:   ' + str(filecounts[i]) + '\n  Image Files:  ' + str(imagefilecounts[i]) + '\n  Total Size:   ' + str(filesizes[i]) + '\n')
+            lines.append(str(server.name) + ':\n  File Count:   ' + str(filecounts[i]) + '\n  Image Files:  ' + str(
+                imagefilecounts[i]) + '\n  Total Size:   ' + str(filesizes[i]) + '\n')
             i += 1
-        lines.append('Total:\n  File Count:   ' + str(totalfilecount) + '\n  Image Files:  ' + str(totalimagefilecount) + '\n  Total Size:   ' + str(round(totalfilesize/1000000, 3)) + 'MB')
+        lines.append('Total:\n  File Count:   ' + str(totalfilecount) + '\n  Image Files:  ' + str(
+            totalimagefilecount) + '\n  Total Size:   ' + str(round(totalfilesize / 1000000, 3)) + 'MB')
         pages = paginate_string(lines)
         for page in pages:
             await self.bot.say(page)
@@ -169,7 +181,8 @@ class File:
             for i in servers:
                 print(str(i))
             if len(servers) > 1:
-                raise Exception('Error: ' + server_id_or_substring + ' matched multiple servers. Please either provide more of the name or the server id.')
+                raise Exception(
+                    'Error: ' + server_id_or_substring + ' matched multiple servers. Please either provide more of the name or the server id.')
             if len(servers) is 0:
                 raise Exception('Error: ' + server_id_or_substring + ' did not match any servers.')
             server = servers[0]
@@ -182,7 +195,8 @@ class File:
                 await self.bot.say('Please enter a valid server id or name')
         print('Server Name: ' + str(server.name))
         print('Server ID: ' + str(server.id))
-        await self.bot.say('These are all the logged attachments for {} (Server ID: {})'.format(str(server.name), str(server.id)))
+        await self.bot.say(
+            'These are all the logged attachments for {} (Server ID: {})'.format(str(server.name), str(server.id)))
         B = ['.log']
         blacklist = re.compile('|'.join([re.escape(word) for word in B]))
         files_ = []
@@ -202,9 +216,6 @@ class File:
             except discord.HTTPException:
                 await self.bot.say('I need the `Attach Files` permission to do this')
         await self.bot.say('Done')
-
-
-
 
 
 def setup(bot):

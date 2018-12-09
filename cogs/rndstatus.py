@@ -7,6 +7,7 @@ from random import choice as rndchoice
 import os
 import time
 
+
 class RandomStatus:
     """Cycles random statuses
 
@@ -26,7 +27,7 @@ class RandomStatus:
             await send_cmd_help(ctx)
 
     @rndstatus.command(name="set", pass_context=True, no_pm=True)
-    async def _set(self, ctx, *statuses : str):
+    async def _set(self, ctx, *statuses: str):
         """Sets Red's random statuses
 
         Accepts multiple statuses.
@@ -43,9 +44,8 @@ class RandomStatus:
         await self.bot.change_presence(status=current_status)
         await self.bot.say("Done. Redo this command with no parameters to see the current list of statuses.")
 
-
     @rndstatus.command(pass_context=True)
-    async def delay(self, ctx, seconds : int):
+    async def delay(self, ctx, seconds: int):
         """Sets interval of random status switch
 
         Must be 20 or superior."""
@@ -61,7 +61,7 @@ class RandomStatus:
             current_game = str(message.server.me.game)
             current_status = message.server.me.status
 
-            if self.last_change == None: #first run
+            if self.last_change == None:  # first run
                 self.last_change = int(time.perf_counter())
                 if len(self.statuses) > 0 and (current_game in self.statuses or current_game == "None"):
                     new_game = self.random_status(message)
@@ -73,8 +73,9 @@ class RandomStatus:
                     new_game = self.random_status(message)
                     if new_game != None:
                         if current_game != new_game:
-                            if current_game in self.statuses or current_game == "None": #Prevents rndstatus from overwriting song's titles or
-                                await self.bot.change_presence(game=discord.Game(name=new_game), status=current_status) #custom statuses set with !set status
+                            if current_game in self.statuses or current_game == "None":  # Prevents rndstatus from overwriting song's titles or
+                                await self.bot.change_presence(game=discord.Game(name=new_game),
+                                                               status=current_status)  # custom statuses set with !set status
 
     def random_status(self, msg):
         current = str(msg.server.me.game)
@@ -88,13 +89,15 @@ class RandomStatus:
             new = None
         return new
 
+
 def check_folders():
     if not os.path.exists("data/rndstatus"):
         print("Creating data/rndstatus folder...")
         os.makedirs("data/rndstatus")
 
-def check_files():        
-    settings = {"DELAY" : 300}
+
+def check_files():
+    settings = {"DELAY": 300}
     if str(os.environ.get('IS_HEROKU')) == 'True':
         default = [str(os.environ.get('PREFIX').split(',')[0]) + 'help']
     else:
@@ -109,6 +112,7 @@ def check_files():
     if not fileIO(f, "check"):
         print("Creating empty statuses.json...")
         fileIO(f, "save", default)
+
 
 def setup(bot):
     check_folders()

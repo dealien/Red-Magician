@@ -6,7 +6,6 @@ from .utils.dataIO import dataIO
 
 
 class SmartReact:
-
     """Create automatic reactions when trigger words are typed in chat"""
 
     def __init__(self, bot):

@@ -24,7 +24,7 @@ class CustomCommands:
 
     @customcom.command(name="add", pass_context=True)
     @checks.mod_or_permissions(administrator=True)
-    async def cc_add(self, ctx, command : str, *, text):
+    async def cc_add(self, ctx, command: str, *, text):
         """Adds a custom command
 
         Example:
@@ -53,7 +53,7 @@ class CustomCommands:
 
     @customcom.command(name="edit", pass_context=True)
     @checks.mod_or_permissions(administrator=True)
-    async def cc_edit(self, ctx, command : str, *, text):
+    async def cc_edit(self, ctx, command: str, *, text):
         """Edits a custom command
 
         Example:
@@ -79,7 +79,7 @@ class CustomCommands:
 
     @customcom.command(name="delete", pass_context=True)
     @checks.mod_or_permissions(administrator=True)
-    async def cc_delete(self, ctx, command : str):
+    async def cc_delete(self, ctx, command: str):
         """Deletes a custom command
 
         Example:
@@ -163,10 +163,10 @@ class CustomCommands:
         """
         raw_result = "{" + result + "}"
         objects = {
-            "message" : message,
-            "author"  : message.author,
-            "channel" : message.channel,
-            "server"  : message.server
+            "message": message,
+            "author": message.author,
+            "channel": message.channel,
+            "server": message.server
         }
         if result in objects:
             return str(objects[result])

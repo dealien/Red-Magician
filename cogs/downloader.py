@@ -111,6 +111,7 @@ class Downloader:
     @repo.command(name="remove")
     async def _repo_del(self, repo_name: str):
         """Removes repo from repo list. COGS ARE NOT REMOVED."""
+
         def remove_readonly(func, path, excinfo):
             os.chmod(path, 0o755)
             func(path)
@@ -167,7 +168,7 @@ class Downloader:
             await self.bot.say(box(page))
 
     @cog.command()
-    async def info(self, repo_name: str, cog: str=None):
+    async def info(self, repo_name: str, cog: str = None):
         """Shows info about the specified cog"""
         if cog is not None:
             cogs = self.list_cogs(repo_name)
@@ -209,13 +210,13 @@ class Downloader:
         num_repos = len(self.repos)
 
         min_dt = 0.5
-        burst_inc = 0.1/(NUM_THREADS)
+        burst_inc = 0.1 / (NUM_THREADS)
         touch_n = tasknum
         touch_t = time()
 
         def regulate(touch_t, touch_n):
             dt = time() - touch_t
-            if dt + burst_inc*(touch_n) > min_dt:
+            if dt + burst_inc * (touch_n) > min_dt:
                 touch_n = 0
                 touch_t = time()
                 return True, touch_t, touch_n
@@ -282,17 +283,17 @@ class Downloader:
 
         if new_cogs:
             status += '\nNew cogs: ' \
-                   + ', '.join('%s/%s' % c[:2] for c in new_cogs) + '.'
+                      + ', '.join('%s/%s' % c[:2] for c in new_cogs) + '.'
         if deleted_cogs:
             status += '\nDeleted cogs: ' \
-                   + ', '.join('%s/%s' % c[:2] for c in deleted_cogs) + '.'
+                      + ', '.join('%s/%s' % c[:2] for c in deleted_cogs) + '.'
         if updated_cogs:
             status += '\nUpdated cogs: ' \
-                   + ', '.join('%s/%s' % c[:2] for c in updated_cogs) + '.'
+                      + ', '.join('%s/%s' % c[:2] for c in updated_cogs) + '.'
         if failed_cogs:
             status += '\nCogs that got new requirements which have ' + \
-                   'failed to install: ' + \
-                   ', '.join('%s/%s' % c[:2] for c in failed_cogs) + '.'
+                      'failed to install: ' + \
+                      ', '.join('%s/%s' % c[:2] for c in failed_cogs) + '.'
         if error_repos:
             status += '\nThe following repos failed to update: '
             for n, what in error_repos.items():
@@ -332,11 +333,11 @@ class Downloader:
                     fail_list.append(cog)
             msg = 'Done.'
             if update_list:
-                msg += " The following cogs were reloaded: "\
-                    + ', '.join(update_list) + "\n"
+                msg += " The following cogs were reloaded: " \
+                       + ', '.join(update_list) + "\n"
             if fail_list:
-                msg += " The following cogs failed to reload: "\
-                    + ', '.join(fail_list)
+                msg += " The following cogs failed to reload: " \
+                       + ', '.join(fail_list)
             await self.bot.say(msg)
 
         else:
@@ -550,7 +551,7 @@ class Downloader:
                     invalid.append(repo)
                     continue
                 except Exception as e:
-                    print(e) # TODO: Proper logging
+                    print(e)  # TODO: Proper logging
                     continue
 
         for repo in invalid:
@@ -587,13 +588,13 @@ class Downloader:
             folder = os.path.join(dd, name)
             # Make sure we don't git reset the Red folder on accident
             if not os.path.exists(os.path.join(folder, '.git')):
-                #if os.path.exists(folder):
-                    #shutil.rmtree(folder)
+                # if os.path.exists(folder):
+                # shutil.rmtree(folder)
                 url = self.repos[name].get('url')
                 if not url:
                     raise UpdateError("Need to clone but no URL set")
                 branch = None
-                if "@" in url: # Specific branch
+                if "@" in url:  # Specific branch
                     url, branch = url.rsplit("@", maxsplit=1)
                 if branch is None:
                     p = run(["git", "clone", url, folder])
@@ -610,7 +611,7 @@ class Downloader:
 
                 rpcmd = ["git", "-C", folder, "rev-parse", branch]
                 p = run(["git", "-C", folder, "reset", "--hard",
-                        "origin/%s" % branch, "-q"])
+                         "origin/%s" % branch, "-q"])
                 if p.returncode != 0:
                     raise UpdateError("Error resetting to origin/%s" % branch)
                 p = run(rpcmd, stdout=PIPE)

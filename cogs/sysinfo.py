@@ -6,6 +6,7 @@ from datetime import datetime
 
 try:
     import psutil
+
     psutilAvailable = True
 except:
     psutilAvailable = False
@@ -31,7 +32,7 @@ class SysInfo:
         cpu_p = psutil.cpu_percent(interval=None, percpu=True)
         cpu_ps = ("CPU Usage"
                   "\n\t{0:<8}: {1}".format("Per CPU", cpu_p) +
-                  "\n\t{0:<8}: {1:.1f}%".format("Overall", sum(cpu_p)/len(cpu_p)))
+                  "\n\t{0:<8}: {1:.1f}%".format("Overall", sum(cpu_p) / len(cpu_p)))
         cpu_t = psutil.cpu_times()
         width = max([len("{:,}".format(int(n))) for n in [cpu_t.user, cpu_t.system, cpu_t.idle]])
         cpu_ts = ("CPU Times"
@@ -86,7 +87,7 @@ class SysInfo:
         # Boot time
         boot_s = ("Boot Time"
                   "\n\t{0}".format(datetime.fromtimestamp(
-                       psutil.boot_time()).strftime("%Y-%m-%d %H:%M:%S")))
+            psutil.boot_time()).strftime("%Y-%m-%d %H:%M:%S")))
 
         await self.bot.say("```" +
                            "\n\n".join([cpu_cs, cpu_ps, cpu_ts, mem_vs, mem_ss, open_fs, disk_us, net_ios, boot_s]) +

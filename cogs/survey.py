@@ -7,25 +7,28 @@ from typing import Any, Dict, List
 
 try:
     from dateutil import parser as dp
+
     dateutil_available = True
 except:
     dateutil_available = False
 import discord
 from discord.ext import commands
+
 try:
     import pytz
+
     pytz_available = True
 except:
     pytz_available = False
 try:
     from tabulate import tabulate
+
     tabulate_available = True
 except:
     tabulate_available = False
 
 from .utils.dataIO import dataIO
 from .utils import checks, chat_formatting as cf
-
 
 Option = Dict[str, Any]
 Options = Dict[str, Option]
@@ -36,7 +39,6 @@ class PastDeadlineError(Exception):
 
 
 class Survey:
-
     """Runs surveys for a specific role of people via DM,
     and prints real-time results to a given text channel.
 
@@ -90,7 +92,7 @@ class Survey:
         return roled
 
     def _deadline_string_to_datetime(self, deadline: str,
-                                     adjust: bool=True) -> datetime:
+                                     adjust: bool = True) -> datetime:
         dl = dp.parse(deadline, tzinfos=tzd)
         if dl.tzinfo is None:
             dl = dl.replace(tzinfo=pytz.utc)
@@ -261,7 +263,7 @@ class Survey:
                 self.tasks[survey_id].append(new_handle)
 
     def _check_reprompt(self, server_id: str, survey_id: str, option_name: str,
-                        link_name: str=None):
+                        link_name: str = None):
         answers = self.surveys[server_id][survey_id]["answers"]
         options = self.surveys[server_id][survey_id]["options"]
 
@@ -291,7 +293,7 @@ class Survey:
             res_message = await self.bot.send_message(
                 channel,
                 "{} (ID {})\n{}"
-                .format(cf.bold(question), survey_id, cf.box(table)))
+                    .format(cf.bold(question), survey_id, cf.box(table)))
             self.surveys[server_id][survey_id][
                 "messages"]["results"] = res_message.id
 
@@ -309,7 +311,7 @@ class Survey:
                     channel,
                     self.surveys[server_id][survey_id]["messages"]["results"]),
                 "{} (ID {})\n{}"
-                .format(cf.bold(question), survey_id, cf.box(table)))
+                    .format(cf.bold(question), survey_id, cf.box(table)))
             self.surveys[server_id][survey_id][
                 "messages"]["results"] = res_message.id
             if waiting:
@@ -319,7 +321,7 @@ class Survey:
                         self.surveys[server_id][survey_id]["messages"]
                         ["waiting"]),
                     "{}\n{}"
-                    .format("Waiting on answers from:", cf.box(waiting)))
+                        .format("Waiting on answers from:", cf.box(waiting)))
                 self.surveys[server_id][survey_id][
                     "messages"]["waiting"] = wait_message.id
             elif (self.surveys[server_id][survey_id]["messages"]["waiting"]
@@ -352,8 +354,8 @@ class Survey:
 
     def _get_server_id_from_survey_id(self, survey_id):
         for server_id, survey_ids in [
-                (ser, sur) for (ser, sur) in self.surveys.items()
-                if ser not in ["next_id", "closed"]]:
+            (ser, sur) for (ser, sur) in self.surveys.items()
+            if ser not in ["next_id", "closed"]]:
             if survey_id in survey_ids:
                 return server_id
         return None
@@ -366,9 +368,9 @@ class Survey:
     async def _send_message_and_wait_for_message(self, server_id: str,
                                                  survey_id: str,
                                                  user: discord.User,
-                                                 change: bool=False,
-                                                 rp_opt: str=None,
-                                                 send_question: bool=True):
+                                                 change: bool = False,
+                                                 rp_opt: str = None,
+                                                 send_question: bool = True):
         try:
             prefix = self.surveys[server_id][survey_id]["prefix"]
             question = self.surveys[server_id][survey_id]["question"]
@@ -398,7 +400,7 @@ class Survey:
                 await self.bot.send_message(user, premsg + cf.question(
                     "{} *[deadline {}]*\n(options: {}){}".format(
                         cf.bold(question), deadline_hr, options_hr,
-                        ("\n"+rp_mes) if rp_opt else "")))
+                        ("\n" + rp_mes) if rp_opt else "")))
 
             channel = await self.bot.start_private_message(user)
 
@@ -426,7 +428,7 @@ class Survey:
                         user,
                         cf.warning(
                             "Please choose one of the available options: ({})"
-                            .format(cf.bold(options_hr))))
+                                .format(cf.bold(options_hr))))
 
             if not answer:
                 await self.bot.send_message(
@@ -539,7 +541,7 @@ class Survey:
 
         await self.bot.reply(cf.info("Survey started. You can close it with"
                                      " `{}closesurvey {}`.".format(
-                                         ctx.prefix, new_survey_id)))
+            ctx.prefix, new_survey_id)))
 
     @commands.command(pass_context=True, no_pm=True, name="closesurvey")
     @checks.admin_or_permissions(administrator=True)
@@ -625,6 +627,7 @@ def setup(bot: commands.Bot):
         raise RuntimeError(
             "You need to install `python-dateutil`:"
             " `pip install python-dateutil`.")
+
 
 tz_str = """-12 Y
 -11 X NUT SST

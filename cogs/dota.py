@@ -8,6 +8,7 @@ import html
 # Check if BeautifulSoup4 is installed
 try:
     from bs4 import BeautifulSoup
+
     soupAvailable = True
 except:
     soupAvailable = False
@@ -15,6 +16,7 @@ except:
 # Check if Dota2py is installed
 try:
     from dota2py import api
+
     dotaAvailable = True
 except:
     dotaAvailable = False
@@ -22,9 +24,11 @@ except:
 # Check if tabulate is installed
 try:
     from tabulate import tabulate
+
     tabulateAvailable = True
 except:
     tabulateAvailable = False
+
 
 class Dota:
     """Dota 2 Red Cog"""
@@ -49,15 +53,14 @@ class Dota:
         else:
             self.key = False
 
-
-    @commands.group(pass_context = True)
+    @commands.group(pass_context=True)
     async def dota(self, ctx):
         """Returns various data for dota players"""
 
         if ctx.invoked_subcommand is None:
             await self.bot.say("Type help dota for info.")
 
-    @dota.command(name = 'setkey', pass_context = True)
+    @dota.command(name='setkey', pass_context=True)
     async def setkey(self, ctx, key):
         """Sets the Dota 2 Wep API key (PM ONLY)"""
 
@@ -77,7 +80,7 @@ class Dota:
         else:
             await self.bot.say("Please run this command in PM")
 
-    @dota.command(name = 'online', pass_context = True)
+    @dota.command(name='online', pass_context=True)
     async def online(self, ctx):
         """Returns current amount of players"""
 
@@ -92,9 +95,10 @@ class Dota:
             online = soupObject.find(class_='home-stats').find('li').find('strong').get_text()
             await self.bot.say(online + ' players are playing this game at the moment')
         except:
-            await self.bot.say("Couldn't load amount of players. No one is playing this game anymore or there's an error.")
+            await self.bot.say(
+                "Couldn't load amount of players. No one is playing this game anymore or there's an error.")
 
-    @dota.command(name = 'hero', pass_context = True)
+    @dota.command(name='hero', pass_context=True)
     async def hero(self, ctx, *, heroReq):
         """Return requested hero's stats"""
 
@@ -109,7 +113,7 @@ class Dota:
 
                 soupObject = BeautifulSoup(unescaped, "html.parser")
 
-                #print(soupObject)
+                # print(soupObject)
 
                 rows = soupObject.find(class_='wikitable sortable').find_all('tr')
 
@@ -134,16 +138,17 @@ class Dota:
                 hero = {
                     'name': heroStats[0].getText()[:-2],
                     'img': heroStats[0].find('img')['src'],
-                    'url': baseUrl + heroStats[0].find('a')['href'].lower().replace('_','-'),
+                    'url': baseUrl + heroStats[0].find('a')['href'].lower().replace('_', '-'),
                     'attribute': heroStats[1].find('a')['title'],
-                    'str': [heroStats[2].getText()[1:-1], heroStats[3].getText()[1:-1]], # stripping the text with [1:-1]
+                    'str': [heroStats[2].getText()[1:-1], heroStats[3].getText()[1:-1]],
+                # stripping the text with [1:-1]
                     'agi': [heroStats[4].getText()[1:-1], heroStats[5].getText()[1:-1]],
                     'int': [heroStats[6].getText()[1:-1], heroStats[7].getText()[1:-1]],
                     'ms': heroStats[11].getText()[1:-1],
                     'armor': heroStats[12].getText()[1:-1],
-                    'attack': [heroStats[13].getText()[1:-1],heroStats[14].getText()[1:-1]],
+                    'attack': [heroStats[13].getText()[1:-1], heroStats[14].getText()[1:-1]],
                     'range': heroStats[15].getText()[1:-1],
-                    'vision': [heroStats[19].getText()[1:-1],heroStats[20].getText()[1:-1]],
+                    'vision': [heroStats[19].getText()[1:-1], heroStats[20].getText()[1:-1]],
                     'regen': heroStats[23].getText()[1:-1]
                 }
 
@@ -154,7 +159,6 @@ class Dota:
                     hero['color'] = 0x55C156
                 else:
                     hero['color'] = 0x2F668D
-
 
                 # build embed
                 em = discord.Embed(title='{} ({})'.format(hero['name'], hero['attribute']),
@@ -180,13 +184,13 @@ class Dota:
                              value=hero['regen'],
                              inline=True)
                 em.add_field(name='Attack',
-                             value='{}-{}'.format(hero['attack'][0],hero['attack'][1]),
+                             value='{}-{}'.format(hero['attack'][0], hero['attack'][1]),
                              inline=True)
                 em.add_field(name='Range',
                              value=hero['range'],
                              inline=True)
                 em.add_field(name='Vision (day/night)',
-                             value='{}/{}'.format(hero['vision'][0],hero['vision'][1]),
+                             value='{}/{}'.format(hero['vision'][0], hero['vision'][1]),
                              inline=True)
                 em.set_footer(text='<3 Dota cog, Gamepedia & Dotabuff')
 
@@ -195,14 +199,14 @@ class Dota:
         except:
             await self.bot.say('Couldn\'t get info from Gamepedia API :(')
 
-    @dota.command(name = 'build', pass_context = True)
+    @dota.command(name='build', pass_context=True)
     async def build(self, ctx, *, hero):
         """Gets most popular skillbuild for a hero"""
 
         # Build an url
         url = "http://www.dotabuff.com/heroes/" + hero.lower().replace(" ", "-")
 
-        async with aiohttp.get(url, headers = {"User-Agent": "Red-DiscordBot"}) as response:
+        async with aiohttp.get(url, headers={"User-Agent": "Red-DiscordBot"}) as response:
             soupObject = BeautifulSoup(await response.text(), "html.parser")
 
         # "build" will contain a final table
@@ -243,14 +247,14 @@ class Dota:
             message = "The most popular build **at the moment**, according to Dotabuff:\n\n"
             message += "```"
             headers = ["Skill/Lvl"]
-            headers[len(headers):] = range(1,7)
-            message += tabulate(getPartialTable(build,1,7), headers=headers, tablefmt="fancy_grid")
+            headers[len(headers):] = range(1, 7)
+            message += tabulate(getPartialTable(build, 1, 7), headers=headers, tablefmt="fancy_grid")
             message += "```\n"
 
             message += "```"
             headers = ["Skill/Lvl"]
-            headers[len(headers):] = range(7,13)
-            message += tabulate(getPartialTable(build,7,13), headers=headers, tablefmt="fancy_grid")
+            headers[len(headers):] = range(7, 13)
+            message += tabulate(getPartialTable(build, 7, 13), headers=headers, tablefmt="fancy_grid")
             message += "```\n"
 
             # Send first part
@@ -258,8 +262,8 @@ class Dota:
 
             message = "```"
             headers = ["Skill/Lvl"]
-            headers[len(headers):] = range(13,19)
-            message += tabulate(getPartialTable(build,13,19), headers=headers, tablefmt="fancy_grid")
+            headers[len(headers):] = range(13, 19)
+            message += tabulate(getPartialTable(build, 13, 19), headers=headers, tablefmt="fancy_grid")
             message += "```\n"
 
             # Send second part
@@ -269,14 +273,14 @@ class Dota:
             # Nothing can be done
             await self.bot.say("Error parsing Dotabuff, maybe try again later")
 
-    @dota.command(name = 'items', pass_context = True)
+    @dota.command(name='items', pass_context=True)
     async def items(self, ctx, *, hero):
         """Gets the most popular items for a hero"""
 
         # Build an url
         url = "http://www.dotabuff.com/heroes/" + hero.lower().replace(" ", "-")
 
-        async with aiohttp.get(url, headers = {"User-Agent": "Red-DiscordBot"}) as response:
+        async with aiohttp.get(url, headers={"User-Agent": "Red-DiscordBot"}) as response:
             soupObject = BeautifulSoup(await response.text(), "html.parser")
 
         # Get the needed data fron the page
@@ -320,7 +324,7 @@ class Dota:
         # em.set_thumbnail(url='some_url')
 
         # add radiant team
-        radiant_totals = [0,0,0]
+        radiant_totals = [0, 0, 0]
         em.add_field(name='Radiant team', value='v==== (K/D/A) ====v', inline=False)
         for radiant_player in match['teams']['radiant']:
             em.add_field(name='{}'.format(radiant_player['name']),
@@ -338,7 +342,7 @@ class Dota:
                      inline=True)
 
         # add dire team
-        dire_totals = [0,0,0]
+        dire_totals = [0, 0, 0]
         em.add_field(name='Dire team', value='v==== (K/D/A) ====v', inline=False)
         for dire_player in match['teams']['dire']:
             em.add_field(name='{}'.format(dire_player['name']),
@@ -359,7 +363,7 @@ class Dota:
 
         return em
 
-    @dota.command(name = 'recent', pass_context = True)
+    @dota.command(name='recent', pass_context=True)
     async def recent(self, ctx, player):
         """Gets the link to player's latest match"""
 
@@ -413,8 +417,10 @@ class Dota:
 
             # Create a proper heroes list
             heroes = heroes["result"]["heroes"]
+
             def build_dict(seq, key):
                 return dict((d[key], dict(d, index=index)) for (index, d) in enumerate(seq))
+
             heroes = build_dict(heroes, "id")
 
             # Create a list of played heroes
@@ -427,32 +433,32 @@ class Dota:
                 'radiant': [],
                 'dire': []
             }
-            for i in range(0,5):
+            for i in range(0, 5):
                 teams['radiant'].append({
                     'name': played_heroes[i],
                     'kills': str(match["players"][i]["kills"]),
                     'deaths': str(match["players"][i]["deaths"]),
                     'assists': str(match["players"][i]["assists"])
-                    })
+                })
                 teams['dire'].append({
-                    'name': played_heroes[5+i],
-                    'kills': str(match["players"][5+i]["kills"]),
-                    'deaths': str(match["players"][5+i]["deaths"]),
-                    'assists': str(match["players"][5+i]["assists"])
-                    })
+                    'name': played_heroes[5 + i],
+                    'kills': str(match["players"][5 + i]["kills"]),
+                    'deaths': str(match["players"][5 + i]["deaths"]),
+                    'assists': str(match["players"][5 + i]["assists"])
+                })
 
             # Reassign match info for ease of use
             matchData = {
                 'id': match['match_seq_num'],
                 'teams': teams,
                 'data': match
-                }
+            }
 
             await self.bot.send_message(ctx.message.channel, embed=self._build_match_embed(matchData))
         else:
             await self.bot.say('Oops.. Something is wrong with Dota2 servers, try again later!')
 
-    @dota.command(name = 'match', pass_context = True)
+    @dota.command(name='match', pass_context=True)
     async def match(self, ctx, matchId):
         """Gets the match results by id"""
 
@@ -497,8 +503,10 @@ class Dota:
 
             # Create a proper heroes list
             heroes = heroes["result"]["heroes"]
+
             def build_dict(seq, key):
                 return dict((d[key], dict(d, index=index)) for (index, d) in enumerate(seq))
+
             heroes = build_dict(heroes, "id")
 
             # Create a list of played heroes
@@ -511,40 +519,44 @@ class Dota:
                 'radiant': [],
                 'dire': []
             }
-            for i in range(0,5):
+            for i in range(0, 5):
                 teams['radiant'].append({
                     'name': played_heroes[i],
                     'kills': str(match["players"][i]["kills"]),
                     'deaths': str(match["players"][i]["deaths"]),
                     'assists': str(match["players"][i]["assists"])
-                    })
+                })
                 teams['dire'].append({
-                    'name': played_heroes[5+i],
-                    'kills': str(match["players"][5+i]["kills"]),
-                    'deaths': str(match["players"][5+i]["deaths"]),
-                    'assists': str(match["players"][5+i]["assists"])
-                    })
+                    'name': played_heroes[5 + i],
+                    'kills': str(match["players"][5 + i]["kills"]),
+                    'deaths': str(match["players"][5 + i]["deaths"]),
+                    'assists': str(match["players"][5 + i]["assists"])
+                })
 
             # Reassign match info for ease of use
             matchData = {
                 'id': match_id,
                 'teams': teams,
                 'data': match
-                }
+            }
 
             await self.bot.send_message(ctx.message.channel, embed=self._build_match_embed(matchData))
         else:
             await self.bot.say('Oops.. Something is wrong with Dota2 servers, try again later!')
+
+
 def check_folders():
     if not os.path.exists("data/dota"):
         print("Creating data/dota folder...")
         os.makedirs("data/dota")
+
 
 def check_files():
     f = "data/dota/settings.json"
     if not fileIO(f, "check"):
         print("Creating empty settings.json...")
         fileIO(f, "save", {})
+
 
 def setup(bot):
     if soupAvailable is False:

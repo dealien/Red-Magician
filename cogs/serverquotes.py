@@ -24,8 +24,8 @@ JSON = PATH + 'quotes.json'
 
 print('Path to serverquotes quote list: ' + PATH)
 
-
 __version__ = '1.5.2'
+
 
 class ServerQuotes:
 
@@ -54,28 +54,27 @@ class ServerQuotes:
         mc = pylibmc.Client(servers, binary=True,
                             username=user, password=password,
                             behaviors={
-                              # Faster IO
-                              "tcp_nodelay": True,
+                                # Faster IO
+                                "tcp_nodelay": True,
 
-                              # Keep connection alive
-                              'tcp_keepalive': True,
+                                # Keep connection alive
+                                'tcp_keepalive': True,
 
-                              # Timeout for set/get requests
-                              'connect_timeout': 2000, # ms
-                              'send_timeout': 750 * 1000, # us
-                              'receive_timeout': 750 * 1000, # us
-                              '_poll_timeout': 2000, # ms
+                                # Timeout for set/get requests
+                                'connect_timeout': 2000,  # ms
+                                'send_timeout': 750 * 1000,  # us
+                                'receive_timeout': 750 * 1000,  # us
+                                '_poll_timeout': 2000,  # ms
 
-                              # Better failover
-                              'ketama': True,
-                              'remove_failed': 1,
-                              'retry_timeout': 2,
-                              'dead_timeout': 30,
+                                # Better failover
+                                'ketama': True,
+                                'remove_failed': 1,
+                                'retry_timeout': 2,
+                                'dead_timeout': 30,
                             })
-        
+
         print('MemCache settings loaded')
         print('MemCache URL: ' + str(mc.get('json_url')))
-
 
     def _load_quotes(self, ctx):
         myjson_url = mc.get('json_url')
@@ -132,8 +131,10 @@ class ServerQuotes:
         print('New Myjson URL saved to MemCache')
         self.settings = dataIO.load_json(self.settings_path)
         dataIO.save_json(JSON, self.quotes)
-        SlackClient(self.settings['SLACK_TOKEN']).api_call("files.upload", channels=self.settings['SLACK_CHANNEL'], file=open(JSON, 'rb'), filename='quotes.json', title='quotes.json', initial_comment='Myjson URL: ' + str(mc.get('json_url')))
-        
+        SlackClient(self.settings['SLACK_TOKEN']).api_call("files.upload", channels=self.settings['SLACK_CHANNEL'],
+                                                           file=open(JSON, 'rb'), filename='quotes.json',
+                                                           title='quotes.json',
+                                                           initial_comment='Myjson URL: ' + str(mc.get('json_url')))
 
     def _quote_author(self, ctx, quote):
         if quote['author_id']:
@@ -201,7 +202,7 @@ class ServerQuotes:
     @commands.command(pass_context=True, no_pm=True)
     async def lsquotes(self, ctx):
         """Displays a list of all quotes"""
-       
+
         # print(str(self.settings))
         # print(type(self.settings))
         # for key,val in self.settings.items():
@@ -291,7 +292,7 @@ def check_folders():
     if not os.path.exists(PATH):
         print("Creating serverquotes folder...")
         os.makedirs(PATH)
-    
+
     folder = "data/slack"
     if not os.path.exists(folder):
         print("Creating {} folder...".format(folder))
@@ -302,13 +303,12 @@ def check_files():
     if not dataIO.is_valid_json(JSON):
         print("Creating empty quotes.json...")
         dataIO.save_json(JSON, {})
-    
+
     folder = "data/slack"
     default = {}
     if not dataIO.is_valid_json("data/slack/settings.json"):
         print("Creating default slack settings.json...")
         dataIO.save_json("data/slack/settings.json", default)
-
 
 
 def setup(bot):

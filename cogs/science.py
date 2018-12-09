@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import os
 
+
 def paginate_string(content):
     page = '```'
     pages = []
@@ -15,8 +16,12 @@ def paginate_string(content):
     pages.append(page)
     return pages
 
-def get_size(start_path = '.'):
-    return sum(os.path.getsize(os.path.join(dirpath,filename)) for dirpath, dirnames, filenames in os.walk(start_path) for filename in filenames)
+
+def get_size(start_path='.'):
+    return sum(
+        os.path.getsize(os.path.join(dirpath, filename)) for dirpath, dirnames, filenames in os.walk(start_path) for
+        filename in filenames)
+
 
 class Science:
     """A custom cog that does stuff! Lots of stuff!"""
@@ -33,11 +38,12 @@ class Science:
             print(str(server))
 
     @commands.command()
-    async def punch(self, user : discord.Member):
+    async def punch(self, user: discord.Member):
         """I will punch anyone! >.<"""
 
         # Command function
         await self.bot.say("ONE PUNCH! And " + user.mention + " is out! ლ(ಠ益ಠლ)")
+
 
 def setup(bot):
     bot.add_cog(Science(bot))

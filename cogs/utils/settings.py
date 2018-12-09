@@ -4,7 +4,6 @@ import discord
 import os
 import argparse
 
-
 default_path = "data/red/settings.json"
 
 
@@ -20,10 +19,10 @@ class Settings:
             "OWNER": None,
             "PREFIXES": [],
             "default": {
-                        "ADMIN_ROLE": "Transistor",
-                        "MOD_ROLE": "Process",
-                        "PREFIXES": []
-                        },
+                "ADMIN_ROLE": "Transistor",
+                "MOD_ROLE": "Process",
+                "PREFIXES": []
+            },
             "MEMCACHIER_SERVERS": None,
             "MEMCACHIER_USERNAME": None,
             "MEMCACHIER_PASSWORD": None,
@@ -31,7 +30,7 @@ class Settings:
             "SLACK_TOKEN": None,
             "SLACK_CHANNEL": None,
             "BOT_USER": None
-            }
+        }
 
         self._memory_only = False
 

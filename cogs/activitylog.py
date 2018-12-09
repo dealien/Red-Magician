@@ -23,15 +23,15 @@ MESSAGE_TEMPLATE = AUTHOR_TEMPLATE + ": {0.clean_content}"
 
 # 0 is Message object, 1 is attachment path
 ATTACHMENT_TEMPLATE = (AUTHOR_TEMPLATE + ": {0.clean_content} (attachment "
-                       "saved to {1})")
+                                         "saved to {1})")
 
 # 0 is before, 1 is after, 2 is formatted timestamp
 EDIT_TEMPLATE = (AUTHOR_TEMPLATE + " edited message from {2} "
-                 "({0.clean_content}) to read: {1.clean_content}")
+                                   "({0.clean_content}) to read: {1.clean_content}")
 
 # 0 is deleted message, 1 is formatted timestamp
 DELETE_TEMPLATE = (AUTHOR_TEMPLATE + " deleted message from {1} "
-                   "({0.clean_content})")
+                                     "({0.clean_content})")
 
 
 class FetchCookie(object):
@@ -54,6 +54,7 @@ class FetchStatus(Enum):
 
 class LogHandle:
     """basic wrapper for logfile handles, used to keep track of stale handles"""
+
     def __init__(self, path, time=None, mode='a', buf=1):
         self.handle = open(path, mode, buf, errors='backslashreplace')
         if time:
@@ -131,7 +132,6 @@ class ActivityLogger(object):
                     async for message in self.bot.logs_from(channel,
                                                             after=fetch_begin,
                                                             reverse=True):
-
                         await self.message_handler(message, force=True,
                                                    subfolder=subfolder,
                                                    force_attachments=attachments)
@@ -426,7 +426,7 @@ class ActivityLogger(object):
 
     def should_download(self, msg):
         return self.should_log(msg.channel) and \
-            self.settings.get('attachments', False)
+               self.settings.get('attachments', False)
 
     def process_attachment(self, message):
         a = message.attachments[0]
@@ -650,6 +650,7 @@ class ActivityLogger(object):
         # TODO: channel permissions overrides
         for e in entries:
             self.log(before.server, e)
+
 
 def check_folders():
     if not os.path.exists(PATH):

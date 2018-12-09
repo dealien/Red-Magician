@@ -2,6 +2,7 @@ import pylibmc
 import asyncio
 import os
 import sys
+
 sys.path.insert(0, "lib")
 import logging
 import logging.handlers
@@ -41,6 +42,7 @@ from slackclient import SlackClient
 #
 
 description = "Red Magician - A multifunction Discord bot by dealien"
+
 
 class Bot(commands.Bot):
     def __init__(self, *args, **kwargs):
@@ -87,7 +89,7 @@ class Bot(commands.Bot):
             for m in self._message_modifiers:
                 try:
                     content = str(m(content))
-                except:   # Faulty modifiers should not
+                except:  # Faulty modifiers should not
                     pass  # break send_message
             kwargs['content'] = content
 
@@ -141,7 +143,8 @@ class Bot(commands.Bot):
             pages = self.formatter.format_help_for(ctx, ctx.command)
             for page in pages:
                 await self.send_message(ctx.message.channel, page)
-            print('Help for command ' + colored('$' + str(ctx.command), 'yellow') + ' sent to ' + colored('#' + str(ctx.message.channel), 'blue'))
+            print('Help for command ' + colored('$' + str(ctx.command), 'yellow') + ' sent to ' + colored(
+                '#' + str(ctx.message.channel), 'blue'))
 
     def user_allowed(self, message):
         author = message.author
@@ -209,7 +212,7 @@ class Bot(commands.Bot):
             name
         ]
 
-        if IS_MAC: # --target is a problem on Homebrew. See PR #552
+        if IS_MAC:  # --target is a problem on Homebrew. See PR #552
             args.remove("--target")
             args.remove("lib")
 
@@ -245,8 +248,8 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
 
     import __main__
     __main__.send_cmd_help = bot.send_cmd_help  # Backwards
-    __main__.user_allowed = bot.user_allowed    # compatibility
-    __main__.settings = bot.settings            # sucks
+    __main__.user_allowed = bot.user_allowed  # compatibility
+    __main__.settings = bot.settings  # sucks
 
     async def get_oauth_url():
         try:
@@ -298,7 +301,7 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
         channels = len([c for c in bot.get_all_channels()])
 
         login_time = datetime.datetime.utcnow() - bot.uptime
-        login_time = login_time.seconds + login_time.microseconds/1E6
+        login_time = login_time.seconds + login_time.microseconds / 1E6
 
         print("Login successful. ({}ms)\n".format(login_time))
 
@@ -335,23 +338,28 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
         else:
             herokustatus = False
 
-        fields = [{"title":"Heroku Deployed","value":str(herokustatus),"short":True}]
-        fields.append({"title":prefix_label,"value":"{}".format(" ".join(bot.settings.prefixes)),"short":True})
-        fields.append({"title":"Cogs","value":"{}/{} active cogs with {} commands".format(len(bot.cogs), total_cogs, len(bot.commands)),"short":True})
-        fields.append({"title":"Active Cogs","value":"{}".format(", ".join(bot.cogs)),"short":False})
+        fields = [{"title": "Heroku Deployed", "value": str(herokustatus), "short": True}]
+        fields.append({"title": prefix_label, "value": "{}".format(" ".join(bot.settings.prefixes)), "short": True})
+        fields.append({"title": "Cogs", "value": "{}/{} active cogs with {} commands".format(len(bot.cogs), total_cogs,
+                                                                                             len(bot.commands)),
+                       "short": True})
+        fields.append({"title": "Active Cogs", "value": "{}".format(", ".join(bot.cogs)), "short": False})
         slackattachments = [{
-                            "fallback": "Red DiscordBot Initialized",
-                            "color": "good",
-                            "title": "Bot Initialized",
-                            "title_link": "https://github.com/dealien/Red-Magician",
-                            "text": "*Servers:* {}, *Channels:* {}, *Users:* {}".format(servers, channels, users),
-                            "fields": fields,
-                            "footer": str(bot.user),
-                            "footer_icon": "https://cdn.discordapp.com/app-icons/349363592627486740/eacdbc4e9c80e0db0e1160db529d45a4.png",
-                            "ts": datetime.datetime.now().timestamp()
-                        }]
+            "fallback": "Red DiscordBot Initialized",
+            "color": "good",
+            "title": "Bot Initialized",
+            "title_link": "https://github.com/dealien/Red-Magician",
+            "text": "*Servers:* {}, *Channels:* {}, *Users:* {}".format(servers, channels, users),
+            "fields": fields,
+            "footer": str(bot.user),
+            "footer_icon": "https://cdn.discordapp.com/app-icons/349363592627486740/eacdbc4e9c80e0db0e1160db529d45a4.png",
+            "ts": datetime.datetime.now().timestamp()
+        }]
         # print(slackattachments)
-        SlackClient(settings.slack_token).api_call("chat.postMessage", channel=settings.slack_channel, attachments=slackattachments, mrkdwn=True, as_user=False, username=str(settings.bot_user).split("#", 1)[0], icon_url="https://cdn.discordapp.com/app-icons/349363592627486740/eacdbc4e9c80e0db0e1160db529d45a4.png")
+        SlackClient(settings.slack_token).api_call("chat.postMessage", channel=settings.slack_channel,
+                                                   attachments=slackattachments, mrkdwn=True, as_user=False,
+                                                   username=str(settings.bot_user).split("#", 1)[0],
+                                                   icon_url="https://cdn.discordapp.com/app-icons/349363592627486740/eacdbc4e9c80e0db0e1160db529d45a4.png")
         print("Slack message sent")
 
         await bot.get_cog('Owner').disable_commands()
@@ -363,7 +371,9 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
     @bot.event
     async def on_command(command, ctx):
         bot.counter["processed_commands"] += 1
-        print('Command ' + colored('$' + str(command), 'yellow') + ' executed by ' + colored(str(ctx.message.author), 'cyan') + ' in channel ' + colored(str(ctx.message.server), 'green') + colored('#' + str(ctx.message.channel), 'blue'))
+        print('Command ' + colored('$' + str(command), 'yellow') + ' executed by ' + colored(str(ctx.message.author),
+                                                                                             'cyan') + ' in channel ' + colored(
+            str(ctx.message.server), 'green') + colored('#' + str(ctx.message.channel), 'blue'))
 
     @bot.event
     async def on_message(message):
@@ -373,7 +383,9 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
 
     @bot.event
     async def on_command_error(error, ctx):
-        print(colored('Error in command ', 'red') + colored('$' + str(ctx.command), 'yellow') + colored(' in channel ', 'red') + colored(str(ctx.message.server), 'green') + colored('#' + str(ctx.message.channel), 'blue'))
+        print(colored('Error in command ', 'red') + colored('$' + str(ctx.command), 'yellow') + colored(' in channel ',
+                                                                                                        'red') + colored(
+            str(ctx.message.server), 'green') + colored('#' + str(ctx.message.channel), 'blue'))
         channel = ctx.message.channel
         if isinstance(error, commands.MissingRequiredArgument):
             await bot.send_cmd_help(ctx)
@@ -446,8 +458,8 @@ def interactive_setup(settings):
             settings.slack_token = None
             settings.slack_channel = None
             print('Slack status updates disabled')
-        dataIO.save_json("data/slack/settings.json", {"SLACK_TOKEN":settings.slack_token,"SLACK_CHANNEL":settings.slack_channel})
-
+        dataIO.save_json("data/slack/settings.json",
+                         {"SLACK_TOKEN": settings.slack_token, "SLACK_CHANNEL": settings.slack_channel})
 
     if str(os.environ.get('IS_HEROKU')) == 'True':
         if len(str(os.environ.get('BOT_TOKEN'))) >= 50:
@@ -493,7 +505,7 @@ def interactive_setup(settings):
                 print("\nAre you sure you want {0} as your prefix?\nYou "
                       "will be able to issue commands like this: {0}help"
                       "\nType yes to confirm or no to change it".format(
-                          new_prefix))
+                    new_prefix))
                 confirmation = get_answer()
             settings.prefixes = [new_prefix]
             settings.save_settings()
@@ -523,6 +535,7 @@ def interactive_setup(settings):
                   "Press enter to continue")
             input("\n")
 
+
 def set_logger(bot):
     logger = logging.getLogger("red")
     logger.setLevel(logging.INFO)
@@ -543,7 +556,7 @@ def set_logger(bot):
 
     fhandler = logging.handlers.RotatingFileHandler(
         filename='data/red/red.log', encoding='utf-8', mode='a',
-        maxBytes=10**7, backupCount=5)
+        maxBytes=10 ** 7, backupCount=5)
     fhandler.setFormatter(red_format)
 
     logger.addHandler(fhandler)
@@ -591,9 +604,18 @@ def set_cog(cog, value):  # TODO: move this out of red.py
 
 def load_cogs(bot):
     if str(os.environ.get('IS_HEROKU')) == 'True':
-        defaults = ["alias", "customcom", "downloader", "economy", "general", "image", "mod", "streams", "trivia", "games", "markov", "identicon", "reactpoll", "wikipedia", "downloader", "alias", "duel", "gamelist", "dota", "general", "trivia", "steam", "sysinfo", "serverquotes", "roller", "science", "reactmenu", "economy", "owner", "customcom", "getfortune", "mod", "survey", "pokedex", "whoplays", "rpsls", "redportal", "rndstatus", "smartreact", "activitylog", "file", "stringutils"]
+        defaults = ["alias", "customcom", "downloader", "economy", "general", "image", "mod", "streams", "trivia",
+                    "games", "markov", "identicon", "reactpoll", "wikipedia", "downloader", "alias", "duel", "gamelist",
+                    "dota", "general", "trivia", "steam", "sysinfo", "serverquotes", "roller", "science", "reactmenu",
+                    "economy", "owner", "customcom", "getfortune", "mod", "survey", "pokedex", "whoplays", "rpsls",
+                    "redportal", "rndstatus", "smartreact", "activitylog", "file", "stringutils"]
     else:
-        defaults = ["alias", "audio", "customcom", "downloader", "economy", "general", "image", "mod", "streams", "trivia", "science", "file", "serverquotes", "games", "markov", "identicon", "reactpoll", "wikipedia", "downloader", "alias", "duel", "gamelist", "dota", "general", "trivia", "steam", "sysinfo", "serverquotes", "roller", "science", "reactmenu", "economy", "owner", "customcom", "getfortune", "mod", "survey", "pokedex", "whoplays", "rpsls", "redportal", "rndstatus", "smartreact", "activitylog", "stringutils"]
+        defaults = ["alias", "audio", "customcom", "downloader", "economy", "general", "image", "mod", "streams",
+                    "trivia", "science", "file", "serverquotes", "games", "markov", "identicon", "reactpoll",
+                    "wikipedia", "downloader", "alias", "duel", "gamelist", "dota", "general", "trivia", "steam",
+                    "sysinfo", "serverquotes", "roller", "science", "reactmenu", "economy", "owner", "customcom",
+                    "getfortune", "mod", "survey", "pokedex", "whoplays", "rpsls", "redportal", "rndstatus",
+                    "smartreact", "activitylog", "stringutils"]
 
     if str(os.environ.get('BASIC_MODE')) == 'True':
         for i in ["audio", "markov"]:
@@ -714,6 +736,6 @@ if __name__ == '__main__':
         if bot._shutdown_mode is True:
             exit(0)
         elif bot._shutdown_mode is False:
-            exit(26) # Restart
+            exit(26)  # Restart
         else:
             exit(1)
