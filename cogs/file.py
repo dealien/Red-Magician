@@ -5,6 +5,9 @@ from __main__ import send_cmd_help
 import time
 import re
 import os
+from printlog import *
+
+log = PrintLog('red.file')
 
 
 def paginate_string(content):
@@ -22,9 +25,11 @@ def paginate_string(content):
 
 
 def get_size(start_path='.'):
-    return sum(
+    size = sum(
         os.path.getsize(os.path.join(dirpath, filename)) for dirpath, dirnames, filenames in os.walk(start_path) for
         filename in filenames)
+    log.info('Total file size: ' + str(size))
+    return size
 
 
 class File:
@@ -44,10 +49,10 @@ class File:
     async def list(self, ctx, server_id_or_substring=None):
         """List names of all logged file attachments for the server specified by id or name substring. Default is the current server."""
         if not server_id_or_substring:
-            print('Defaulting to current server')
+            log.info('Defaulting to current server')
             server = ctx.message.server
         elif isinstance(server_id_or_substring, str):
-            print('Input is a string')
+            log.info('Input is a string')
             myservers = []
             for server in self.bot.servers:
                 myservers.append(server)
@@ -68,17 +73,17 @@ class File:
                 print('Server: ' + str(server))
             except:
                 await self.bot.say('Please enter a valid server id or name')
-        print('Server Name: ' + str(server.name))
-        print('Server ID: ' + str(server.id))
-        # print('Server: ' + str(server.name))
-        # print('Server ID: ' + str(server.id))
+        log.info('Server Name: ' + str(server.name))
+        log.info('Server ID: ' + str(server.id))
         await self.bot.say(
             'These are the names of all the logged attachments for ' + str(server.name) + ' (Server ID: ' + str(
                 server.id) + ')')
         B = ['.log', '.json']
         blacklist = re.compile('|'.join([re.escape(word) for word in B]))
         files_ = []
-        for path, subdirs, filelist in os.walk("/home/red/Red-DiscordBot/data/activitylogger/" + str(server.id)):
+        print('##############################################')
+        for path, subdirs, filelist in os.walk(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/data/activitylogger/" + str(server.id)):
             for file in filelist:
                 files_.append(str(file))
         ifiles = [word for word in files_ if not blacklist.search(word)]
@@ -119,7 +124,7 @@ class File:
             # await send_cmd_help(ctx)
             await self.bot.say(
                 'Error: optional server argument must be either a partial name of a server or a server id.')
-        print(servers)
+        log.info(servers)
         B = ['.log', '.json']
         blacklist = re.compile('|'.join([re.escape(word) for word in B]))
 
@@ -132,7 +137,8 @@ class File:
 
         for server in servers:
             files_ = []
-            for path, subdirs, filelist in os.walk("/home/red/Red-DiscordBot/data/activitylogger/" + server.id):
+            for path, subdirs, filelist in os.walk(
+                    os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/data/activitylogger/" + server.id):
                 for file in filelist:
                     files_.append(str(file))
             files = [word for word in files_ if not blacklist.search(word)]
@@ -144,11 +150,14 @@ class File:
                         imagefiles.append(filename)
             totalfilecount += len(files)
             totalimagefilecount += len(imagefiles)
-            totalfilesize += get_size("/home/red/Red-DiscordBot/data/activitylogger/" + server.id)
+            totalfilesize += get_size(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/data/activitylogger/" + server.id)
             filecounts.append(str(len(files)))
             imagefilecounts.append(str(len(imagefiles)))
             filesizes.append(
-                str(round(get_size("/home/red/Red-DiscordBot/data/activitylogger/" + server.id) / 1000000, 3)) + ' MB')
+                str(round(get_size(os.path.dirname(
+                    os.path.dirname(os.path.abspath(__file__))) + "/data/activitylogger/" + server.id) / 1000000,
+                          3)) + ' MB')
 
         lines = []
         i = 0
@@ -200,7 +209,8 @@ class File:
         B = ['.log']
         blacklist = re.compile('|'.join([re.escape(word) for word in B]))
         files_ = []
-        sdir = '/home/red/Red-DiscordBot/data/activitylogger/{}'.format(str(server.id))
+        sdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/data/activitylogger/{}'.format(
+            str(server.id))
         print('Server directory: {}'.format(sdir))
         for path, subdirs, filelist in os.walk(sdir):
             for filename in filelist:
