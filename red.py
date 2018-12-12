@@ -613,19 +613,14 @@ def set_cog(cog, value):  # TODO: move this out of red.py
 
 
 def load_cogs(bot):
+    defaults = ['alias', 'customcom', 'downloader', 'economy', 'general', 'image', 'mod', 'streams', 'trivia', 'games',
+                'markov', 'identicon', 'reactpoll', 'wikipedia', 'duel', 'gamelist', 'dota', 'steam', 'sysinfo',
+                'serverquotes', 'roller', 'science', 'reactmenu', 'owner', 'getfortune', 'survey', 'pokedex',
+                'whoplays', 'rpsls', 'redportal', 'rndstatus', 'smartreact', 'activitylog', 'file', 'stringutils']
     if str(os.environ.get('IS_HEROKU')) == 'True':
-        defaults = ["alias", "customcom", "downloader", "economy", "general", "image", "mod", "streams", "trivia",
-                    "games", "markov", "identicon", "reactpoll", "wikipedia", "downloader", "alias", "duel", "gamelist",
-                    "dota", "general", "trivia", "steam", "sysinfo", "serverquotes", "roller", "science", "reactmenu",
-                    "economy", "owner", "customcom", "getfortune", "mod", "survey", "pokedex", "whoplays", "rpsls",
-                    "redportal", "rndstatus", "smartreact", "activitylog", "file", "stringutils"]
+        pass
     else:
-        defaults = ["alias", "audio", "customcom", "downloader", "economy", "general", "image", "mod", "streams",
-                    "trivia", "science", "file", "serverquotes", "games", "markov", "identicon", "reactpoll",
-                    "wikipedia", "downloader", "alias", "duel", "gamelist", "dota", "general", "trivia", "steam",
-                    "sysinfo", "serverquotes", "roller", "science", "reactmenu", "economy", "owner", "customcom",
-                    "getfortune", "mod", "survey", "pokedex", "whoplays", "rpsls", "redportal", "rndstatus",
-                    "smartreact", "activitylog", "stringutils"]
+        defaults.append('audio')
 
     if str(os.environ.get('BASIC_MODE')) == 'True':
         for i in ["audio", "markov"]:
