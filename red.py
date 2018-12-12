@@ -64,7 +64,7 @@ class Bot(commands.Bot):
         self.settings = Settings()
         self._intro_displayed = False
         self._shutdown_mode = None
-        self.logger = set_logger(self)
+        self.logger, self.flogger = set_logger(self)
         self._last_exception = None
         self.oauth_url = ""
         if 'self_bot' in kwargs:
@@ -375,6 +375,9 @@ def initialize(bot_class=Bot, formatter_class=Formatter):
                                                                                              'cyan') + ' in channel ' + colored(
             str(ctx.message.server), 'green') + colored('#' + str(ctx.message.channel), 'blue'))
 
+        bot.flogger.info('Command $' + str(command) + ' executed by ' + str(ctx.message.author) + ' in channel ' +
+                         str(ctx.message.server) + '#' + str(ctx.message.channel))
+
     @bot.event
     async def on_message(message):
         bot.counter["messages_read"] += 1
@@ -537,8 +540,10 @@ def interactive_setup(settings):
 
 
 def set_logger(bot):
-    logger = logging.getLogger("red")
+    logger = logging.getLogger("red")  # Logs to both the console and log file
+    flogger = logging.getLogger('red_quiet')  # Logs to the log file only
     logger.setLevel(logging.INFO)
+    flogger.setLevel(logging.INFO)
 
     red_format = logging.Formatter(
         '%(asctime)s %(levelname)s %(module)s %(funcName)s %(lineno)d: '
@@ -550,9 +555,11 @@ def set_logger(bot):
     if bot.settings.debug:
         stdout_handler.setLevel(logging.DEBUG)
         logger.setLevel(logging.DEBUG)
+        flogger.setLevel(logging.DEBUG)
     else:
         stdout_handler.setLevel(logging.INFO)
         logger.setLevel(logging.INFO)
+        flogger.setLevel(logging.INFO)
 
     if os.path.exists('data/red/red.log'):  # Removes existing log file to allow a clean start
         os.remove('data/red/red.log')
@@ -560,9 +567,10 @@ def set_logger(bot):
         filename='data/red/red.log', encoding='utf-8', mode='a',
         maxBytes=10 ** 7, backupCount=5)
     fhandler.setFormatter(red_format)
-
     logger.addHandler(fhandler)
     logger.addHandler(stdout_handler)
+
+    flogger.addHandler(fhandler)
 
     dpy_logger = logging.getLogger("discord")
     if bot.settings.debug:
@@ -577,7 +585,7 @@ def set_logger(bot):
         datefmt="[%d/%m/%Y %H:%M]"))
     dpy_logger.addHandler(handler)
 
-    return logger
+    return logger, flogger
 
 
 def ensure_reply(msg):
