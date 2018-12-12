@@ -1,15 +1,12 @@
+import sys
+
 from discord.ext import commands
 from cogs.utils import checks
 import asyncio
 import os
 from datetime import datetime
+import psutil
 
-try:
-    import psutil
-
-    psutilAvailable = True
-except:
-    psutilAvailable = False
 
 
 class SysInfo:
@@ -104,7 +101,7 @@ class SysInfo:
 
 
 def setup(bot):
-    if psutilAvailable:
+    if 'psutil' in sys.modules:
         n = SysInfo(bot)
         bot.add_cog(n)
     else:
