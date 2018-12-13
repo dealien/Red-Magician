@@ -426,6 +426,7 @@ class Duel:
 
     @commands.group(name="duels", pass_context=True, allow_dms=False)
     async def _duels(self, ctx):
+        """The main duel command. Use without arguments to display the duel leaderboard"""
         if ctx.invoked_subcommand is None:
             await ctx.invoke(self._duels_list)
 
