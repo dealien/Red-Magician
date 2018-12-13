@@ -62,7 +62,7 @@ class Alias:
                 new_content = self.bot.settings.get_prefixes(server)[0]
                 new_content += "help "
                 new_content += help_cmd[len(self.get_prefix(server,
-                                        help_cmd)):]
+                                                            help_cmd)):]
                 message = ctx.message
                 message.content = new_content
                 await self.bot.process_commands(message)

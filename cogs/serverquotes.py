@@ -1,7 +1,7 @@
 import pylibmc
 import discord
 from discord.ext import commands
-from cogs.utils.dataIO import dataIO
+from .utils.dataIO import dataIO
 from .utils import checks
 from .utils.chat_formatting import escape_mass_mentions, pagify
 import os
@@ -9,6 +9,10 @@ from random import choice as randchoice
 import json
 import requests
 import ast
+from slackclient import SlackClient
+import pprint
+
+pp = pprint.PrettyPrinter(indent=4)
 
 try:
     from tabulate import tabulate
@@ -20,42 +24,8 @@ JSON = PATH + 'quotes.json'
 
 print('Path to serverquotes quote list: ' + PATH)
 
-
 __version__ = '1.5.2'
 
-if os.environ.get('IS_HEROKU') == 'True':
-    servers = os.environ.get('MEMCACHIER_SERVERS', '').split(',')
-    user = os.environ.get('MEMCACHIER_USERNAME', '')
-    password = os.environ.get('MEMCACHIER_PASSWORD', '')
-else:
-    servers = settings.mem_servers
-    user = settings.mem_username
-    password = settings.mem_password
-
-mc = pylibmc.Client(servers, binary=True,
-                    username=user, password=password,
-                    behaviors={
-                      # Faster IO
-                      "tcp_nodelay": True,
-
-                      # Keep connection alive
-                      'tcp_keepalive': True,
-
-                      # Timeout for set/get requests
-                      'connect_timeout': 2000, # ms
-                      'send_timeout': 750 * 1000, # us
-                      'receive_timeout': 750 * 1000, # us
-                      '_poll_timeout': 2000, # ms
-
-                      # Better failover
-                      'ketama': True,
-                      'remove_failed': 1,
-                      'retry_timeout': 2,
-                      'dead_timeout': 30,
-                    })
-
-print('MemCache settings loaded')
-print('MemCache URL: ' + str(mc.get('json_url')))
 
 class ServerQuotes:
 
@@ -67,6 +37,44 @@ class ServerQuotes:
         data = json.loads(resp.text)
         self.quotes = data
         print('Quotes loaded from Myjson')
+        # Load settings (necessary for Slack integration)
+        # TODO: Properly integrate settings.py instead of using this imprecise work-around
+        self.settings_path = "data/red/settings.json"
+        self.settings = dataIO.load_json(self.settings_path)
+
+        if os.environ.get('IS_HEROKU') == 'True':
+            servers = os.environ.get('MEMCACHIER_SERVERS', '').split(',')
+            user = os.environ.get('MEMCACHIER_USERNAME', '')
+            password = os.environ.get('MEMCACHIER_PASSWORD', '')
+        else:
+            servers = self.settings.mem_servers
+            user = self.settings.mem_username
+            password = self.settings.mem_password
+
+        mc = pylibmc.Client(servers, binary=True,
+                            username=user, password=password,
+                            behaviors={
+                                # Faster IO
+                                "tcp_nodelay": True,
+
+                                # Keep connection alive
+                                'tcp_keepalive': True,
+
+                                # Timeout for set/get requests
+                                'connect_timeout': 2000,  # ms
+                                'send_timeout': 750 * 1000,  # us
+                                'receive_timeout': 750 * 1000,  # us
+                                '_poll_timeout': 2000,  # ms
+
+                                # Better failover
+                                'ketama': True,
+                                'remove_failed': 1,
+                                'retry_timeout': 2,
+                                'dead_timeout': 30,
+                            })
+
+        print('MemCache settings loaded')
+        print('MemCache URL: ' + str(mc.get('json_url')))
 
     def _load_quotes(self, ctx):
         myjson_url = mc.get('json_url')
@@ -121,6 +129,12 @@ class ServerQuotes:
         print('New Myjson URL: ' + ast.literal_eval(r.text)['uri'])
         mc.set('json_url', ast.literal_eval(r.text)['uri'])
         print('New Myjson URL saved to MemCache')
+        self.settings = dataIO.load_json(self.settings_path)
+        dataIO.save_json(JSON, self.quotes)
+        SlackClient(self.settings['SLACK_TOKEN']).api_call("files.upload", channels=self.settings['SLACK_CHANNEL'],
+                                                           file=open(JSON, 'rb'), filename='quotes.json',
+                                                           title='quotes.json',
+                                                           initial_comment='Myjson URL: ' + str(mc.get('json_url')))
 
     def _quote_author(self, ctx, quote):
         if quote['author_id']:
@@ -188,6 +202,23 @@ class ServerQuotes:
     @commands.command(pass_context=True, no_pm=True)
     async def lsquotes(self, ctx):
         """Displays a list of all quotes"""
+
+        # print(str(self.settings))
+        # print(type(self.settings))
+        # for key,val in self.settings.items():
+        #     print(key, " => ", val)
+        # self.settings = dataIO.load_json(self.settings_path)
+        # dataIO.save_json(JSON, self.quotes)
+        # print("BOT_USER = " + self.settings['BOT_USER'])
+        # print("SLACK_TOKEN = " + self.settings['SLACK_TOKEN'])
+        # print("SLACK_CHANNEL = " + self.settings['SLACK_CHANNEL'])
+        # print(JSON)
+        # f = open(JSON)
+        # pp.pprint(f)
+        # print('')
+        # pp.pprint(f.read())
+        # print('')
+        # SlackClient(self.settings['SLACK_TOKEN']).api_call("files.upload", channels=self.settings['SLACK_CHANNEL'], file=open(JSON, 'rb'), filename='quotes.json', title='quotes.json', initial_comment='Myjson URL: ' + str(mc.get('json_url')))
         sid = ctx.message.server.id
         quotes = self.quotes.get(sid, [])
         if not quotes:
@@ -257,20 +288,31 @@ class ServerQuotes:
         await self.bot.say(self._format_quote(ctx, quote))
 
 
-def check_folder():
+def check_folders():
     if not os.path.exists(PATH):
         print("Creating serverquotes folder...")
         os.makedirs(PATH)
 
+    folder = "data/slack"
+    if not os.path.exists(folder):
+        print("Creating {} folder...".format(folder))
+        os.makedirs(folder)
 
-def check_file():
+
+def check_files():
     if not dataIO.is_valid_json(JSON):
         print("Creating empty quotes.json...")
         dataIO.save_json(JSON, {})
 
+    folder = "data/slack"
+    default = {}
+    if not dataIO.is_valid_json("data/slack/settings.json"):
+        print("Creating default slack settings.json...")
+        dataIO.save_json("data/slack/settings.json", default)
+
 
 def setup(bot):
-    check_folder()
-    check_file()
+    check_folders()
+    check_files()
     n = ServerQuotes(bot)
     bot.add_cog(n)

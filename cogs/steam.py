@@ -4,12 +4,12 @@ import aiohttp
 import re
 import logging
 
-
 log = logging.getLogger('red.steam')
 
 
 class Steam:
     """Steam and SteamSpy related commands"""
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -58,7 +58,7 @@ class Steam:
 
             if answer:
                 if is_number(answer.content.strip()) and int(answer.content.strip()) in range(1, 6):
-                    return(result[int(answer.content.strip()) - 1]['appid'])
+                    return (result[int(answer.content.strip()) - 1]['appid'])
                 else:
                     await self.bot.say("Please enter just a number next time :(")
                     return None
@@ -73,7 +73,7 @@ class Steam:
         if "error" not in data.keys():
 
             # check for romanian numbers
-            testR = re.compile('\s[vVxX](\W|$)',).search(game)
+            testR = re.compile('\s[vVxX](\W|$)', ).search(game)
             if testR is not None:
                 game = game[:testR.start() + 1] + '\s' + game[testR.start() + 1:]
 
@@ -135,10 +135,12 @@ class Steam:
                               url='http://steamspy.com/app/' + str(appId),
                               icon_url='https://pbs.twimg.com/profile_images/624266818891423744/opyF6mM5_400x400.png')
                 em.add_field(name='Owners',
-                             value=str('{0:,}'.format(gameResult['owners'])) + ' ±' + str('{0:,}'.format(gameResult['owners_variance'])),
+                             value=str('{0:,}'.format(gameResult['owners'])) + ' ±' + str(
+                                 '{0:,}'.format(gameResult['owners_variance'])),
                              inline=True)
                 em.add_field(name='Players in last 2 weeks',
-                             value=str('{0:,}'.format(gameResult['players_2weeks'])) + ' ±' + str('{0:,}'.format(gameResult['players_2weeks_variance'])),
+                             value=str('{0:,}'.format(gameResult['players_2weeks'])) + ' ±' + str(
+                                 '{0:,}'.format(gameResult['players_2weeks_variance'])),
                              inline=True)
                 em.add_field(name='Peak in 24 hours',
                              value=str('{0:,}'.format(gameResult['ccu'])),

@@ -11,34 +11,32 @@ import re
 import logging
 import asyncio
 
-
 ACTIONS_REPR = {
-    "BAN"     : ("Ban", "\N{HAMMER}"),
-    "KICK"    : ("Kick", "\N{WOMANS BOOTS}"),
-    "CMUTE"   : ("Channel mute", "\N{SPEAKER WITH CANCELLATION STROKE}"),
-    "SMUTE"   : ("Server mute", "\N{SPEAKER WITH CANCELLATION STROKE}"),
-    "SOFTBAN" : ("Softban", "\N{DASH SYMBOL} \N{HAMMER}"),
-    "HACKBAN" : ("Preemptive ban", "\N{BUST IN SILHOUETTE} \N{HAMMER}"),
-    "UNBAN"   : ("Unban", "\N{DOVE OF PEACE}")
+    "BAN": ("Ban", "\N{HAMMER}"),
+    "KICK": ("Kick", "\N{WOMANS BOOTS}"),
+    "CMUTE": ("Channel mute", "\N{SPEAKER WITH CANCELLATION STROKE}"),
+    "SMUTE": ("Server mute", "\N{SPEAKER WITH CANCELLATION STROKE}"),
+    "SOFTBAN": ("Softban", "\N{DASH SYMBOL} \N{HAMMER}"),
+    "HACKBAN": ("Preemptive ban", "\N{BUST IN SILHOUETTE} \N{HAMMER}"),
+    "UNBAN": ("Unban", "\N{DOVE OF PEACE}")
 }
 
 ACTIONS_CASES = {
-    "BAN"     : True,
-    "KICK"    : True,
-    "CMUTE"   : False,
-    "SMUTE"   : True,
-    "SOFTBAN" : True,
-    "HACKBAN" : True,
-    "UNBAN"   : True
+    "BAN": True,
+    "KICK": True,
+    "CMUTE": False,
+    "SMUTE": True,
+    "SOFTBAN": True,
+    "HACKBAN": True,
+    "UNBAN": True
 }
 
 default_settings = {
-    "ban_mention_spam"  : False,
-    "delete_repeats"    : False,
-    "mod-log"           : None,
-    "respect_hierarchy" : False
+    "ban_mention_spam": False,
+    "delete_repeats": False,
+    "mod-log": None,
+    "respect_hierarchy": False
 }
-
 
 for act, enabled in ACTIONS_CASES.items():
     act = act.lower() + '_cases'
@@ -71,6 +69,7 @@ class TempCache:
     from triggering twice in the mod-log.
     Kinda hacky but functioning
     """
+
     def __init__(self, bot):
         self.bot = bot
         self._cache = []
@@ -144,7 +143,7 @@ class Mod:
                            "`{}set modrole`".format(ctx.prefix))
 
     @modset.command(pass_context=True, no_pm=True)
-    async def modlog(self, ctx, channel : discord.Channel=None):
+    async def modlog(self, ctx, channel: discord.Channel = None):
         """Sets a channel as mod log
 
         Leaving the channel parameter empty will deactivate it"""
@@ -162,7 +161,7 @@ class Mod:
         dataIO.save_json("data/mod/settings.json", self.settings)
 
     @modset.command(pass_context=True, no_pm=True)
-    async def banmentionspam(self, ctx, max_mentions : int=False):
+    async def banmentionspam(self, ctx, max_mentions: int = False):
         """Enables auto ban for messages mentioning X different people
 
         Accepted values: 5 or superior"""
@@ -205,7 +204,7 @@ class Mod:
         await self.bot.say("Cases have been reset.")
 
     @modset.command(pass_context=True, no_pm=True)
-    async def deletedelay(self, ctx, time: int=None):
+    async def deletedelay(self, ctx, time: int = None):
         """Sets the delay until the bot removes the command message.
             Must be between -1 and 60.
 
@@ -445,7 +444,7 @@ class Mod:
             return
 
         try:
-            invite = await self.bot.create_invite(server, max_age=3600*24)
+            invite = await self.bot.create_invite(server, max_age=3600 * 24)
             invite = "\nInvite: " + invite
         except:
             invite = ""
@@ -453,15 +452,15 @@ class Mod:
             try:
                 try:  # We don't want blocked DMs preventing us from banning
                     msg = await self.bot.send_message(user, "You have been banned and "
-                              "then unbanned as a quick way to delete your messages.\n"
-                              "You can now join the server again.{}".format(invite))
+                                                            "then unbanned as a quick way to delete your messages.\n"
+                                                            "You can now join the server again.{}".format(invite))
                 except:
                     pass
                 self.temp_cache.add(user, server, "BAN")
                 await self.bot.ban(user, 1)
                 logger.info("{}({}) softbanned {}({}), deleting 1 day worth "
-                    "of messages".format(author.name, author.id, user.name,
-                     user.id))
+                            "of messages".format(author.name, author.id, user.name,
+                                                 user.id))
                 await self.new_case(server,
                                     action="SOFTBAN",
                                     mod=author,
@@ -480,7 +479,7 @@ class Mod:
 
     @commands.command(no_pm=True, pass_context=True)
     @checks.admin_or_permissions(manage_nicknames=True)
-    async def rename(self, ctx, user : discord.Member, *, nickname=""):
+    async def rename(self, ctx, user: discord.Member, *, nickname=""):
         """Changes user's nickname
 
         Leaving the nickname empty will remove it."""
@@ -496,7 +495,7 @@ class Mod:
 
     @commands.group(pass_context=True, no_pm=True, invoke_without_command=True)
     @checks.mod_or_permissions(administrator=True)
-    async def mute(self, ctx, user : discord.Member, *, reason: str = None):
+    async def mute(self, ctx, user: discord.Member, *, reason: str = None):
         """Mutes user in the channel/server
 
         Defaults to channel"""
@@ -505,7 +504,7 @@ class Mod:
 
     @checks.mod_or_permissions(administrator=True)
     @mute.command(name="channel", pass_context=True, no_pm=True)
-    async def channel_mute(self, ctx, user : discord.Member, *, reason: str = None):
+    async def channel_mute(self, ctx, user: discord.Member, *, reason: str = None):
         """Mutes user in the current channel"""
         author = ctx.message.author
         channel = ctx.message.channel
@@ -542,7 +541,7 @@ class Mod:
 
     @checks.mod_or_permissions(administrator=True)
     @mute.command(name="server", pass_context=True, no_pm=True)
-    async def server_mute(self, ctx, user : discord.Member, *, reason: str = None):
+    async def server_mute(self, ctx, user: discord.Member, *, reason: str = None):
         """Mutes user in the server"""
         author = ctx.message.author
         server = ctx.message.server
@@ -586,7 +585,7 @@ class Mod:
 
     @commands.group(pass_context=True, no_pm=True, invoke_without_command=True)
     @checks.mod_or_permissions(administrator=True)
-    async def unmute(self, ctx, user : discord.Member):
+    async def unmute(self, ctx, user: discord.Member):
         """Unmutes user in the channel/server
 
         Defaults to channel"""
@@ -595,7 +594,7 @@ class Mod:
 
     @checks.mod_or_permissions(administrator=True)
     @unmute.command(name="channel", pass_context=True, no_pm=True)
-    async def channel_unmute(self, ctx, user : discord.Member):
+    async def channel_unmute(self, ctx, user: discord.Member):
         """Unmutes user in the current channel"""
         channel = ctx.message.channel
         author = ctx.message.author
@@ -640,7 +639,7 @@ class Mod:
 
     @checks.mod_or_permissions(administrator=True)
     @unmute.command(name="server", pass_context=True, no_pm=True)
-    async def server_unmute(self, ctx, user : discord.Member):
+    async def server_unmute(self, ctx, user: discord.Member):
         """Unmutes user in the server"""
         server = ctx.message.server
         author = ctx.message.author
@@ -734,7 +733,7 @@ class Mod:
 
         logger.info("{}({}) deleted {} messages "
                     " containing '{}' in channel {}".format(author.name,
-                    author.id, len(to_delete), text, channel.id))
+                                                            author.id, len(to_delete), text, channel.id))
 
         if is_bot:
             await self.mass_purge(to_delete)
@@ -793,7 +792,7 @@ class Mod:
             await self.slow_deletion(to_delete)
 
     @cleanup.command(pass_context=True, no_pm=True)
-    async def after(self, ctx, message_id : int):
+    async def after(self, ctx, message_id: int):
         """Deletes all messages after specified message
 
         To get a message id, enable developer mode in Discord's
@@ -854,7 +853,7 @@ class Mod:
             await self.bot.say("I'm not allowed to delete messages.")
             return
 
-        async for message in self.bot.logs_from(channel, limit=number+1):
+        async for message in self.bot.logs_from(channel, limit=number + 1):
             to_delete.append(message)
 
         logger.info("{}({}) deleted {} messages in channel {}"
@@ -1005,7 +1004,7 @@ class Mod:
 
     @commands.command(pass_context=True)
     @checks.mod_or_permissions(manage_messages=True)
-    async def reason(self, ctx, case, *, reason : str=""):
+    async def reason(self, ctx, case, *, reason: str = ""):
         """Lets you specify a reason for mod-log's cases
 
         Defaults to last case assigned to yourself, if available."""
@@ -1051,7 +1050,7 @@ class Mod:
             await self.bot.say(self.count_ignored())
 
     @ignore.command(name="channel", pass_context=True)
-    async def ignore_channel(self, ctx, channel: discord.Channel=None):
+    async def ignore_channel(self, ctx, channel: discord.Channel = None):
         """Ignores channel
 
         Defaults to current one"""
@@ -1091,7 +1090,7 @@ class Mod:
             await self.bot.say(self.count_ignored())
 
     @unignore.command(name="channel", pass_context=True)
-    async def unignore_channel(self, ctx, channel: discord.Channel=None):
+    async def unignore_channel(self, ctx, channel: discord.Channel = None):
         """Removes channel from ignore list
 
         Defaults to current one"""
@@ -1255,7 +1254,7 @@ class Mod:
             await self.bot.say("Something went wrong.")
 
     @commands.command()
-    async def names(self, user : discord.Member):
+    async def names(self, user: discord.Member):
         """Show previous names/nicknames of a user"""
         server = user.server
         names = self.past_names[user.id] if user.id in self.past_names else None
@@ -1371,20 +1370,20 @@ class Mod:
         case_n = len(self.cases[server.id]) + 1
 
         case = {
-            "case"         : case_n,
-            "created"      : datetime.utcnow().timestamp(),
-            "modified"     : None,
-            "action"       : action,
-            "channel"      : channel.id if channel else None,
-            "user"         : str(user),
-            "user_id"      : user.id,
-            "reason"       : reason,
-            "moderator"    : str(mod) if mod is not None else None,
-            "moderator_id" : mod.id if mod is not None else None,
-            "amended_by"   : None,
-            "amended_id"   : None,
-            "message"      : None,
-            "until"        : None,
+            "case": case_n,
+            "created": datetime.utcnow().timestamp(),
+            "modified": None,
+            "action": action,
+            "channel": channel.id if channel else None,
+            "user": str(user),
+            "user_id": user.id,
+            "reason": reason,
+            "moderator": str(mod) if mod is not None else None,
+            "moderator_id": mod.id if mod is not None else None,
+            "amended_by": None,
+            "amended_id": None,
+            "message": None,
+            "until": None,
         }
 
         case_msg = self.format_case_msg(case)
@@ -1444,7 +1443,6 @@ class Mod:
             raise NoModLogAccess()
         else:
             await self.bot.edit_message(msg, case_msg)
-
 
     def format_case_msg(self, case):
         tmp = case.copy()
@@ -1661,7 +1659,7 @@ def strfdelta(delta):
         if delta.days > 1:
             ds += 's'
         s.append(ds)
-    hrs, rem = divmod(delta.seconds, 60*60)
+    hrs, rem = divmod(delta.seconds, 60 * 60)
     if hrs:
         hs = '%i hr' % hrs
         if hrs > 1:
@@ -1687,13 +1685,13 @@ def check_files():
     ignore_list = {"SERVERS": [], "CHANNELS": []}
 
     files = {
-        "ignorelist.json"     : ignore_list,
-        "filter.json"         : {},
-        "past_names.json"     : {},
-        "past_nicknames.json" : {},
-        "settings.json"       : {},
-        "modlog.json"         : {},
-        "perms_cache.json"    : {}
+        "ignorelist.json": ignore_list,
+        "filter.json": {},
+        "past_names.json": {},
+        "past_nicknames.json": {},
+        "settings.json": {},
+        "modlog.json": {},
+        "perms_cache.json": {}
     }
 
     for filename, value in files.items():

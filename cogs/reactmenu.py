@@ -4,7 +4,6 @@ from cogs.utils import checks
 from cogs.utils.dataIO import dataIO
 
 
-
 def default_check(reaction, user):
     if user.bot:
         return False
@@ -242,6 +241,7 @@ class ReactMenu():
             timeout=timeout,
             check=check, is_open=is_open,
             emoji=emoji, message=message)
+
 
 def setup(bot):
     bot.add_cog(ReactMenu(bot))

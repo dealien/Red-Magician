@@ -4,7 +4,6 @@ import discord
 import os
 import argparse
 
-
 default_path = "data/red/settings.json"
 
 
@@ -20,17 +19,18 @@ class Settings:
             "OWNER": None,
             "PREFIXES": [],
             "default": {
-                        "ADMIN_ROLE": "Transistor",
-                        "MOD_ROLE": "Process",
-                        "PREFIXES": []
-                        },
+                "ADMIN_ROLE": "Transistor",
+                "MOD_ROLE": "Process",
+                "PREFIXES": []
+            },
             "MEMCACHIER_SERVERS": None,
             "MEMCACHIER_USERNAME": None,
             "MEMCACHIER_PASSWORD": None,
             "SLACK": None,
             "SLACK_TOKEN": None,
-            "SLACK_CHANNEL": None
-            }
+            "SLACK_CHANNEL": None,
+            "BOT_USER": None
+        }
 
         self._memory_only = False
 
@@ -262,6 +262,15 @@ class Settings:
     @mem_password.setter
     def mem_password(self, value):
         self.bot_settings["MEMCACHIER_PASSWORD"] = value
+        self.save_settings()
+
+    @property
+    def bot_user(self):
+        return self.bot_settings["BOT_USER"]
+
+    @bot_user.setter
+    def bot_user(self, value):
+        self.bot_settings["BOT_USER"] = value
         self.save_settings()
 
     @property

@@ -10,10 +10,10 @@ import os
 import asyncio
 import chardet
 
-DEFAULTS = {"MAX_SCORE"    : 10,
-            "TIMEOUT"      : 120,
-            "DELAY"        : 15,
-            "BOT_PLAYS"    : False,
+DEFAULTS = {"MAX_SCORE": 10,
+            "TIMEOUT": 120,
+            "DELAY": 15,
+            "BOT_PLAYS": False,
             "REVEAL_ANSWER": True}
 
 TriviaLine = namedtuple("TriviaLine", "question answers")
@@ -21,6 +21,7 @@ TriviaLine = namedtuple("TriviaLine", "question answers")
 
 class Trivia:
     """General commands."""
+
     def __init__(self, bot):
         self.bot = bot
         self.trivia_sessions = []
@@ -44,7 +45,7 @@ class Trivia:
             await self.bot.say(msg)
 
     @triviaset.command(pass_context=True)
-    async def maxscore(self, ctx, score : int):
+    async def maxscore(self, ctx, score: int):
         """Points required to win"""
         server = ctx.message.server
         if score > 0:
@@ -55,7 +56,7 @@ class Trivia:
             await self.bot.say("Score must be superior to 0.")
 
     @triviaset.command(pass_context=True)
-    async def timelimit(self, ctx, seconds : int):
+    async def timelimit(self, ctx, seconds: int):
         """Maximum seconds to answer"""
         server = ctx.message.server
         if seconds > 4:
@@ -212,7 +213,7 @@ class TriviaSession():
                               "Moving on...",
                               "I'm sure you'll know the answer of the next one.",
                               "\N{PENSIVE FACE} Next one.")
-        self.current_line = None # {"QUESTION" : "String", "ANSWERS" : []}
+        self.current_line = None  # {"QUESTION" : "String", "ANSWERS" : []}
         self.question_list = trivia_list
         self.channel = message.channel
         self.starter = message.author
@@ -254,7 +255,7 @@ class TriviaSession():
                 await self.bot.say("Guys...? Well, I guess I'll stop then.")
                 await self.stop_trivia()
                 return True
-            await asyncio.sleep(1) #Waiting for an answer or for the time limit
+            await asyncio.sleep(1)  # Waiting for an answer or for the time limit
         if self.status == "correct answer":
             self.status = "new question"
             await asyncio.sleep(3)

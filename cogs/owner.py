@@ -14,8 +14,9 @@ import datetime
 import glob
 import os
 import aiohttp
+from printlog import *
 
-log = logging.getLogger("red.owner")
+log = PrintLog('red.owner')
 
 
 class CogNotFoundError(Exception):
@@ -56,7 +57,7 @@ class Owner:
         self.session.close()
 
     @commands.group(invoke_without_command=True)
-    @checks.is_owner()    
+    @checks.is_owner()
     async def load(self, *, cog_name: str):
         """Loads a cog
 
@@ -104,7 +105,7 @@ class Owner:
         if still_unloaded:
             still_unloaded = ", ".join(still_unloaded)
             await self.bot.say("I was unable to load some cogs: "
-                "{}".format(still_unloaded))
+                               "{}".format(still_unloaded))
         else:
             await self.bot.say("All cogs are now loaded.")
 
@@ -154,10 +155,9 @@ class Owner:
         if still_loaded:
             still_loaded = ", ".join(still_loaded)
             await self.bot.say("I was unable to unload some cogs: "
-                "{}".format(still_loaded))
+                               "{}".format(still_loaded))
         else:
             await self.bot.say("All cogs are now unloaded.")
-
 
     @checks.is_owner()
     @commands.command(name="reload")
@@ -220,6 +220,7 @@ class Owner:
     @checks.is_owner()
     async def debug(self, ctx, *, code):
         """Evaluates code"""
+
         def check(m):
             if m.content.strip().lower() == "more":
                 return True
@@ -268,7 +269,7 @@ class Owner:
             if i != 0 and i % 4 == 0:
                 last = await self.bot.say("There are still {} messages. "
                                           "Type `more` to continue."
-                                          "".format(len(result) - (i+1)))
+                                          "".format(len(result) - (i + 1)))
                 msg = await self.bot.wait_for_message(author=author,
                                                       channel=channel,
                                                       check=check,
@@ -303,9 +304,9 @@ class Owner:
 
         if self.bot.settings.owner is not None:
             await self.bot.say(
-            "The owner is already set. Remember that setting the owner "
-            "to someone else other than who hosts the bot has security "
-            "repercussions and is *NOT recommended*. Proceed at your own risk."
+                "The owner is already set. Remember that setting the owner "
+                "to someone else other than who hosts the bot has security "
+                "repercussions and is *NOT recommended*. Proceed at your own risk."
             )
             await asyncio.sleep(3)
 
@@ -422,7 +423,7 @@ class Owner:
             await self.bot.say("Done.")
         except discord.Forbidden:
             await self.bot.say("I cannot do that, I lack the "
-                "\"Change Nickname\" permission.")
+                               "\"Change Nickname\" permission.")
 
     @_set.command(pass_context=True)
     @checks.is_owner()
@@ -457,11 +458,11 @@ class Owner:
             invisible"""
 
         statuses = {
-                    "online"    : discord.Status.online,
-                    "idle"      : discord.Status.idle,
-                    "dnd"       : discord.Status.dnd,
-                    "invisible" : discord.Status.invisible
-                   }
+            "online": discord.Status.online,
+            "idle": discord.Status.idle,
+            "dnd": discord.Status.dnd,
+            "invisible": discord.Status.invisible
+        }
 
         server = ctx.message.server
 
@@ -655,11 +656,11 @@ class Owner:
 
     @commands.command()
     @checks.is_owner()
-    async def shutdown(self, silently : bool=False):
+    async def shutdown(self, silently: bool = False):
         """Shuts down Red"""
         wave = "\N{WAVING HAND SIGN}"
         skin = "\N{EMOJI MODIFIER FITZPATRICK TYPE-3}"
-        try: # We don't want missing perms to stop our shutdown
+        try:  # We don't want missing perms to stop our shutdown
             if not silently:
                 await self.bot.say("Shutting down... " + wave + skin)
         except:
@@ -668,7 +669,7 @@ class Owner:
 
     @commands.command()
     @checks.is_owner()
-    async def restart(self, silently : bool=False):
+    async def restart(self, silently: bool = False):
         """Attempts to restart Red
 
         Makes Red quit with exit code 26
@@ -726,7 +727,7 @@ class Owner:
             comm_obj.enabled = True
             comm_obj.hidden = False
         except:  # In case it was in the disabled list but not currently loaded
-            pass # No point in even checking what returns
+            pass  # No point in even checking what returns
 
     async def get_command(self, command):
         command = command.split()
@@ -743,7 +744,7 @@ class Owner:
                 return False
         return comm_obj
 
-    async def disable_commands(self): # runs at boot
+    async def disable_commands(self):  # runs at boot
         for cmd in self.disabled_commands:
             cmd_obj = await self.get_command(cmd)
             try:
@@ -804,7 +805,7 @@ class Owner:
 
     async def leave_confirmation(self, server, owner, ctx):
         await self.bot.say("Are you sure you want me "
-                    "to leave {}? (yes/no)".format(server.name))
+                           "to leave {}? (yes/no)".format(server.name))
 
         msg = await self.bot.wait_for_message(author=owner, timeout=15)
 
@@ -819,7 +820,7 @@ class Owner:
 
     @commands.command(pass_context=True)
     @commands.cooldown(1, 60, commands.BucketType.user)
-    async def contact(self, ctx, *, message : str):
+    async def contact(self, ctx, *, message: str):
         """Sends a message to the owner"""
         if self.bot.settings.owner is None:
             await self.bot.say("I have no owner set.")
@@ -900,7 +901,7 @@ class Owner:
         embed.add_field(name="discord.py", value=dpy_version)
         embed.add_field(name="About Red Magician", value=about, inline=False)
         embed.set_footer(text="Bringing joy since 02 Jan 2016 (over "
-                         "{} days ago!)".format(days_since))
+                              "{} days ago!)".format(days_since))
 
         try:
             await self.bot.say(embed=embed)
@@ -929,7 +930,7 @@ class Owner:
 
     @commands.command(pass_context=True)
     @checks.is_owner()
-    async def traceback(self, ctx, public: bool=False):
+    async def traceback(self, ctx, public: bool = False):
         """Sends to the owner the last command exception that has occurred
 
         If public (yes is specified), it will be sent to the chat instead"""
@@ -999,7 +1000,7 @@ class Owner:
 
     def _wait_for_answer(self, author):
         print(author.name + " requested to be set as owner. If this is you, "
-              "type 'yes'. Otherwise press enter.")
+                            "type 'yes'. Otherwise press enter.")
         print()
         print("*DO NOT* set anyone else as owner. This has security "
               "repercussions.")
@@ -1026,9 +1027,9 @@ class Owner:
             return e
 
         commands = " && ".join((
-            r'git config --get remote.origin.url',         # Remote URL
-            r'git rev-list --count HEAD',                  # Number of commits
-            r'git rev-parse --abbrev-ref HEAD',            # Branch name
+            r'git config --get remote.origin.url',  # Remote URL
+            r'git rev-list --count HEAD',  # Number of commits
+            r'git rev-parse --abbrev-ref HEAD',  # Branch name
             r'git show -s -n 3 HEAD --format="%cr|%s|%H"'  # Last 3 commits
         ))
         result = os.popen(commands).read()

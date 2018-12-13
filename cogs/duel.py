@@ -206,14 +206,15 @@ HEAL = {"{a} decides to {v} {o} instead of attacking.": HEALS,
         "{a} calls a timeout and {v} {o}.": indicatize(HEALS),
         "{a} decides to meditate on their round.": 5}
 
-
 FUMBLE = {"{a} closes in on {d}, but suddenly remembers a funny joke and laughs instead.": 0,
           "{a} moves in to attack {d}, but is disctracted by a shiny.": 0,
-          "{a} {v} their {o} at {d}, but has sweaty hands and loses their grip, hitting themself instead.": indicatize(WEAPONS),
+          "{a} {v} their {o} at {d}, but has sweaty hands and loses their grip, hitting themself instead.": indicatize(
+              WEAPONS),
           "{a} {v} their {o}, but fumbles and drops it on their {b}!": indicatize(WEAPONS)
           }
 
-BOT = {"{a} charges its laser aaaaaaaand... BZZZZZZT! {d} is now a smoking crater for daring to challenge the bot.": INITIAL_HP}
+BOT = {
+    "{a} charges its laser aaaaaaaand... BZZZZZZT! {d} is now a smoking crater for daring to challenge the bot.": INITIAL_HP}
 
 HITS = ['deals', 'hits for']
 RECOVERS = ['recovers', 'gains', 'heals']
@@ -430,7 +431,7 @@ class Duel:
 
     @_duels.command(name="list", pass_context=True)
     @commands.cooldown(2, 60, commands.BucketType.user)
-    async def _duels_list(self, ctx, top: int=10):
+    async def _duels_list(self, ctx, top: int = 10):
         """Shows the duel leaderboard, defaults to top 10"""
         server = ctx.message.server
         server_members = {m.id for m in server.members}
@@ -601,11 +602,11 @@ class Duel:
                 victor.wins += 1
                 loser.losses += 1
                 msg = 'After {0} rounds, {1.mention} wins with ' \
-                    '{1.hp} HP!'.format(i + 1, victor)
+                      '{1.hp} HP!'.format(i + 1, victor)
                 msg += '\nStats: '
                 for p, end in ((victor, '; '), (loser, '.')):
                     msg += '{0} has {0.wins} wins, {0.losses} losses, ' \
-                        '{0.draws} draws{1}'.format(p, end)
+                           '{0.draws} draws{1}'.format(p, end)
             else:
                 victor = None
                 for p in [p1, p2]:
@@ -668,6 +669,7 @@ class Duel:
         except:
             raise
         return msg
+
 
 def weighted_choice(choices):
     total = sum(w for c, w in choices.items())

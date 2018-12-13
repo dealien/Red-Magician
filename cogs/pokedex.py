@@ -12,14 +12,16 @@ from discord.ext import commands
 from __main__ import send_cmd_help
 
 # Third Party Libraries
-try:   # check if BeautifulSoup4 is installed
+try:  # check if BeautifulSoup4 is installed
     from bs4 import BeautifulSoup
+
     soupAvailable = True
 except ImportError:
     soupAvailable = False
 
-try:   # Check if Tabulate is installed
+try:  # Check if Tabulate is installed
     from tabulate import tabulate
+
     tabulateAvailable = True
 except ImportError:
     tabulateAvailable = False
@@ -139,7 +141,7 @@ class Pokedex:
             # Stats
             rep_text = "Other Pokémon with this total"
             div = soup.find('div', attrs={'id': 'mw-content-text', 'lang': 'en', 'dir': 'ltr',
-                            'class': 'mw-content-ltr'})
+                                          'class': 'mw-content-ltr'})
             stat_table = div.find('table', attrs={'align': 'left'})
             raw_stats = [x.get_text(strip=True) for x in stat_table.find_all('table')]
             stats = [x.replace(rep_text, "").replace(":", ": ") for x in raw_stats]
@@ -147,7 +149,7 @@ class Pokedex:
             # Weaknesses / Resistances
             if pokemon.title() != "Eevee":
                 wri_table = soup.find('table', attrs={'class': 'roundy', 'width': '100%',
-                                      'align': 'center', 'cellpadding': 0})
+                                                      'align': 'center', 'cellpadding': 0})
             else:
                 tb_attrs = {'class': 'roundy', 'width': '100%',
                             'align': 'center', 'cellpadding': 0,
@@ -316,7 +318,7 @@ class Pokedex:
             try:
                 soup = BeautifulSoup(await response.text(), "html.parser")
                 div = soup.find('div', attrs={'class':
-                                              'infocard-evo-list'})
+                                                  'infocard-evo-list'})
                 evo = div.text.strip()
                 await self.bot.say("```{}```".format(evo))
             except AttributeError:
@@ -351,11 +353,13 @@ class Pokedex:
         if [x for x in abilities if "or " and pokemon.title() in abilities]:
             abilities = [re.split(' or |\*', x) if 'or' in x else x for x in abilities]
             ab_linked = [fmt.format(re.sub(r'\((.*?)\)', '', x), link,
-                         pattern.sub(lambda m: rep[re.escape(m.group(0))], x),
-                         re.search(r'\((.*?)\)', x).group(1)) if "(Hidden Ability)" in x
+                                    pattern.sub(lambda m: rep[re.escape(m.group(0))], x),
+                                    re.search(r'\((.*?)\)', x).group(1)) if "(Hidden Ability)" in x
                          else "[{0}]({2}{3}) or [{1}]({2}{4})".format(x[0], x[1], link,
-                         pattern.sub(lambda m: rep[re.escape(m.group(0))], x[0]),
-                         pattern.sub(lambda m: rep[re.escape(m.group(0))], x[1]))
+                                                                      pattern.sub(lambda m: rep[re.escape(m.group(0))],
+                                                                                  x[0]),
+                                                                      pattern.sub(lambda m: rep[re.escape(m.group(0))],
+                                                                                  x[1]))
                          for x in abilities]
 
         elif "or " in abilities[0]:
@@ -363,19 +367,21 @@ class Pokedex:
             del abilities[0]
             abilities.append(split)
             ab_linked = [fmt.format(re.sub(r'\((.*?)\)', '', x), link,
-                         pattern.sub(lambda m: rep[re.escape(m.group(0))], x),
-                         re.search(r'\((.*?)\)', x).group(1)) if "(Hidden Ability)" in x
+                                    pattern.sub(lambda m: rep[re.escape(m.group(0))], x),
+                                    re.search(r'\((.*?)\)', x).group(1)) if "(Hidden Ability)" in x
                          else "[{0}]({2}{3}) or [{1}]({2}{4})".format(x[0], x[1], link,
-                         pattern.sub(lambda m: rep[re.escape(m.group(0))], x[0]),
-                         pattern.sub(lambda m: rep[re.escape(m.group(0))], x[1]))
+                                                                      pattern.sub(lambda m: rep[re.escape(m.group(0))],
+                                                                                  x[0]),
+                                                                      pattern.sub(lambda m: rep[re.escape(m.group(0))],
+                                                                                  x[1]))
                          for x in abilities]
             ab_linked.reverse()
         else:
             ab_linked = [fmt.format(re.sub(r' \((.*?)\)', '', x), link,
-                         pattern.sub(lambda m: rep[re.escape(m.group(0))], x),
-                         re.search(r'\((.*?)\)', x).group(1)) if "(" in x
+                                    pattern.sub(lambda m: rep[re.escape(m.group(0))], x),
+                                    re.search(r'\((.*?)\)', x).group(1)) if "(" in x
                          else "[{}]({}{})".format(x, link,
-                         pattern.sub(lambda m: rep[re.escape(m.group(0))], x))
+                                                  pattern.sub(lambda m: rep[re.escape(m.group(0))], x))
                          for x in abilities]
         return ab_linked
 

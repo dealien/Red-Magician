@@ -10,7 +10,7 @@ from discord.ext import commands
 import re
 
 
-class StringFuncs:
+class StringUtilities:
     """A cog that provides various string analysis and manipulation commands."""
 
     def __init__(self, bot):
@@ -18,7 +18,7 @@ class StringFuncs:
 
     @commands.group(name="string", pass_context=True)
     async def _string(self, ctx):
-        """Logged file operations"""
+        """Various string manipulations"""
         if ctx.invoked_subcommand is None:
             await send_cmd_help(ctx)
 
@@ -26,7 +26,15 @@ class StringFuncs:
     async def length(self, ctx, input_string):
         """Returns the length of the input string."""
         await self.bot.say('`' + str(len(input_string)) + '`')
-        
+
+    @_string.command(pass_context=True)
+    async def reverse(self, ctx, input_string):
+        """Returns the input string backwards."""
+        reverse = ''
+        for i in input_string:
+            reverse = i + reverse
+        await self.bot.say('`' + reverse + '`')
+
 
 def setup(bot):
-    bot.add_cog(StringFuncs(bot))
+    bot.add_cog(StringUtilities(bot))

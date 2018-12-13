@@ -110,11 +110,12 @@ class Markov:
                 for i in range(len(words) - 1):
                     if words[i] not in self.model[server.id][channel.id]:
                         self.model[server.id][channel.id][words[i]] = list()
-                    self.model[server.id][channel.id][words[i]].append(words[i+1])
+                    self.model[server.id][channel.id][words[i]].append(words[i + 1])
 
                 fileIO('data/markov/model.json', "save", self.model)
         except:
             pass
+
 
 # ------------------------------ setup ----------------------------------------
 

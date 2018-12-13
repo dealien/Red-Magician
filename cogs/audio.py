@@ -18,11 +18,12 @@ import math
 import time
 import inspect
 import subprocess
+from printlog import *
+
+log = PrintLog('red.audio')
 
 __author__ = "tekulvw"
 __version__ = "0.1.1"
-
-log = logging.getLogger("red.audio")
 
 try:
     import youtube_dl
@@ -195,7 +196,6 @@ class Playlist:
                     is_admin,
                     is_mod))
 
-
     # def __del__() ?
 
     def append_song(self, author, url):
@@ -341,7 +341,7 @@ class Audio:
 
     def _cache_min(self):
         x = self._server_count()
-        return max([60, 48 * math.log(x) * x**0.3])  # log is not log10
+        return max([60, 48 * math.log(x) * x ** 0.3])  # log is not log10
 
     def _cache_required_files(self):
         queue = copy.deepcopy(self.queue)
@@ -357,7 +357,7 @@ class Audio:
     def _cache_size(self):
         songs = os.listdir(self.cache_path)
         size = sum(map(lambda s: os.path.getsize(
-            os.path.join(self.cache_path, s)) / 10**6, songs))
+            os.path.join(self.cache_path, s)) / 10 ** 6, songs))
         return size
 
     def _cache_too_large(self):
@@ -875,7 +875,7 @@ class Audio:
 
     def _playlist_exists(self, server, name):
         return self._playlist_exists_local(server, name) or \
-            self._playlist_exists_global(name)
+               self._playlist_exists_global(name)
 
     def _playlist_exists_global(self, name):
         f = "data/audio/playlists"
@@ -1049,7 +1049,7 @@ class Audio:
             await self.bot.say("Sorry, but because of the number of servers"
                                " that your bot is in I cannot safely allow"
                                " you to have less than {} MB of cache.".format(
-                                   self._cache_min()))
+                self._cache_min()))
             return
 
         self.settings["MAX_CACHE"] = size
@@ -1115,7 +1115,7 @@ class Audio:
 
     @audioset.command(pass_context=True, name="volume", no_pm=True)
     @checks.mod_or_permissions(manage_messages=True)
-    async def audioset_volume(self, ctx, percent: int=None):
+    async def audioset_volume(self, ctx, percent: int = None):
         """Sets the volume (0 - 100)
         Note: volume may be set up to 200 but you may experience clipping."""
         server = ctx.message.server
@@ -1564,7 +1564,6 @@ class Audio:
         self._delete_playlist(server, name)
         await self.bot.say("Playlist deleted.")
 
-
     @playlist.command(pass_context=True, no_pm=True, name="start")
     async def playlist_start(self, ctx, name):
         """Plays a playlist."""
@@ -1832,7 +1831,6 @@ class Audio:
         is_admin = discord.utils.get(member.roles, name=admin_role) is not None
         is_mod = discord.utils.get(member.roles, name=mod_role) is not None
 
-
         nonbots = sum(not m.bot for m in member.voice_channel.voice_members)
         alone = nonbots <= 1
 
@@ -1873,12 +1871,12 @@ class Audio:
                 dur = None
             msg = ("\n**Title:** {}\n**Author:** {}\n**Uploader:** {}\n"
                    "**Views:** {}\n**Duration:** {}\n\n<{}>".format(
-                       song.title, song.creator, song.uploader,
-                       song.view_count, dur, song.webpage_url))
+                song.title, song.creator, song.uploader,
+                song.view_count, dur, song.webpage_url))
             await self.bot.say(msg.replace("**Author:** None\n", "")
-                                  .replace("**Views:** None\n", "")
-                                  .replace("**Uploader:** None\n", "")
-                                  .replace("**Duration:** None\n", ""))
+                               .replace("**Views:** None\n", "")
+                               .replace("**Uploader:** None\n", "")
+                               .replace("**Duration:** None\n", ""))
         else:
             await self.bot.say("Darude - Sandstorm.")
 
@@ -2199,6 +2197,7 @@ def check_files():
                         "Adding " + str(key) + " field to audio settings.json")
             dataIO.save_json(settings_path, current)
 
+
 def verify_ffmpeg_avconv():
     try:
         subprocess.call(["ffmpeg", "-version"], stdout=subprocess.DEVNULL)
@@ -2213,6 +2212,7 @@ def verify_ffmpeg_avconv():
         return False
     else:
         return "avconv"
+
 
 def setup(bot):
     check_folders()
@@ -2237,10 +2237,10 @@ def setup(bot):
         else:
             msg = "Neither ffmpeg nor avconv are installed"
         raise RuntimeError(
-          "{}.\nConsult the guide for your operating system "
-          "and do ALL the steps in order.\n"
-          "https://dealien.github.io/Red-Magician-Docs/\n"
-          "".format(msg))
+            "{}.\nConsult the guide for your operating system "
+            "and do ALL the steps in order.\n"
+            "https://dealien.github.io/Red-Magician-Docs/\n"
+            "".format(msg))
 
     n = Audio(bot, player=player)  # Praise 26
     bot.add_cog(n)

@@ -1,8 +1,13 @@
+import json
+
 from cogs.utils.dataIO import dataIO
 from discord.ext import commands
 import os
 import random
 import asyncio
+from printlog import *
+
+log = PrintLog('red.rpsls')
 
 
 class RPSLS:
@@ -52,6 +57,17 @@ def check_folder():
     if not os.path.exists('data/rpsls'):
         print('Creating data/rpsls folder...')
         os.makedirs('data/rpsls')
+    if not os.path.isfile('data/rpsls/weaknesses.json'):
+        data = json.loads(
+            '{'
+            '"rock":["paper","spock"],'
+            '"paper":["scissors","lizard"],'
+            '"scissors":["spock","rock"],'
+            '"lizard":["scissors","rock"],'
+            '"spock":["paper","lizard"]'
+            '}')
+        with open('data/rpsls/weaknesses.json', 'w+') as f:
+            json.dump(data, f)
 
 
 def setup(bot):

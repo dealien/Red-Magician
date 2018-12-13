@@ -7,6 +7,7 @@ class Wikipedia:
     """
     Le Wikipedia Cog
     """
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -35,8 +36,11 @@ class Wikipedia:
                 for page in result['query']['pages']:
                     title = result['query']['pages'][page]['title']
                     description = result['query']['pages'][page]['extract'].replace('\n', '\n\n')
-                em = discord.Embed(title='Wikipedia: {}'.format(title), description='\a\n{}...\n\a'.format(description[:-3]), color=discord.Color.blue(), url='https://en.wikipedia.org/wiki/{}'.format(title.replace(' ', '_')))
-                em.set_footer(text='Information provided by Wikimedia', icon_url='https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Wikimedia-logo.png/600px-Wikimedia-logo.png')
+                em = discord.Embed(title='Wikipedia: {}'.format(title),
+                                   description='\a\n{}...\n\a'.format(description[:-3]), color=discord.Color.blue(),
+                                   url='https://en.wikipedia.org/wiki/{}'.format(title.replace(' ', '_')))
+                em.set_footer(text='Information provided by Wikimedia',
+                              icon_url='https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Wikimedia-logo.png/600px-Wikimedia-logo.png')
                 await self.bot.say(embed=em)
             else:
                 message = 'I\'m sorry, I can\'t find {}'.format(''.join(query))

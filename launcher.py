@@ -2,9 +2,10 @@ from __future__ import print_function
 import os
 import sys
 import subprocess
-try:                                        # Older Pythons lack this
-    import urllib.request                   # We'll let them reach the Python
-    from importlib.util import find_spec    # check anyway
+
+try:  # Older Pythons lack this
+    import urllib.request  # We'll let them reach the Python
+    from importlib.util import find_spec  # check anyway
 except ImportError:
     pass
 import platform
@@ -14,6 +15,7 @@ import argparse
 import shutil
 import stat
 import time
+
 try:
     import pip
 except ImportError:
@@ -39,9 +41,9 @@ INTERACTIVE_MODE = not len(sys.argv) > 1  # CLI flags = non-interactive
 PYTHON_OK = sys.version_info >= (3, 5)
 
 FFMPEG_FILES = {
-    "ffmpeg.exe"  : "e0d60f7c0d27ad9d7472ddf13e78dc89",
-    "ffplay.exe"  : "d100abe8281cbcc3e6aebe550c675e09",
-    "ffprobe.exe" : "0e84b782c0346a98434ed476e937764f"
+    "ffmpeg.exe": "e0d60f7c0d27ad9d7472ddf13e78dc89",
+    "ffplay.exe": "d100abe8281cbcc3e6aebe550c675e09",
+    "ffprobe.exe": "0e84b782c0346a98434ed476e937764f"
 }
 
 
@@ -86,7 +88,7 @@ def install_reqs(audio):
         "-r", txt
     ]
 
-    if IS_MAC: # --target is a problem on Homebrew. See PR #552
+    if IS_MAC:  # --target is a problem on Homebrew. See PR #552
         args.remove("--target")
         args.remove(REQS_DIR)
 
@@ -218,10 +220,10 @@ def download_ffmpeg(bitness):
 
 
 def verify_requirements():
-    sys.path_importer_cache = {} # I don't know if the cache reset has any
-    basic = find_spec("discord") # side effect. Without it, the lib folder
-    audio = find_spec("nacl")    # wouldn't be seen if it didn't exist
-    if not basic:                # when the launcher was started
+    sys.path_importer_cache = {}  # I don't know if the cache reset has any
+    basic = find_spec("discord")  # side effect. Without it, the lib folder
+    audio = find_spec("nacl")  # wouldn't be seen if it didn't exist
+    if not basic:  # when the launcher was started
         return None
     elif not audio:
         return False
@@ -232,8 +234,8 @@ def verify_requirements():
 def is_git_installed():
     try:
         subprocess.call(["git", "--version"], stdout=subprocess.DEVNULL,
-                                              stdin =subprocess.DEVNULL,
-                                              stderr=subprocess.DEVNULL)
+                        stdin=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL)
     except FileNotFoundError:
         return False
     else:
@@ -362,7 +364,7 @@ def maintenance_menu():
 def run_red(autorestart):
     interpreter = sys.executable
 
-    if interpreter is None: # This should never happen
+    if interpreter is None:  # This should never happen
         raise RuntimeError("Couldn't find Python's interpreter")
 
     if verify_requirements() is None:
@@ -470,12 +472,12 @@ def create_fast_start_scripts():
         else:
             ext = ".command"
 
-    start_red             = shebang + ccd + start_red             + pause
+    start_red = shebang + ccd + start_red + pause
     start_red_autorestart = shebang + ccd + start_red_autorestart + pause
 
     files = {
-        "start_red"             + ext : start_red,
-        "start_red_autorestart" + ext : start_red_autorestart
+        "start_red" + ext: start_red,
+        "start_red_autorestart" + ext: start_red_autorestart
     }
 
     if not IS_WINDOWS:
@@ -488,7 +490,7 @@ def create_fast_start_scripts():
             with open(filename, "w") as f:
                 f.write(content)
 
-    if not IS_WINDOWS and modified: # Let's make them executable on Unix
+    if not IS_WINDOWS and modified:  # Let's make them executable on Unix
         for script in files:
             st = os.stat(script)
             os.chmod(script, st.st_mode | stat.S_IEXEC)
@@ -543,6 +545,7 @@ def main():
         elif choice == "0":
             break
         clear_screen()
+
 
 args = parse_cli_arguments()
 

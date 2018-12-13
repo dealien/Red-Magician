@@ -3,6 +3,7 @@ import asyncio
 import re
 from discord.ext import commands
 
+
 # This cog is basically a fork of the poll function in Red Bot's general.py
 # I wanted to preserve as much compatibility as possible so ReactPoll
 # could be a subclass of NewPoll if necessary.
@@ -11,7 +12,6 @@ from discord.ext import commands
 
 
 class ReactPoll:
-
     """Create polls using emoji reactions"""
 
     def __init__(self, bot):
@@ -69,7 +69,7 @@ class ReactPoll:
     async def check_poll_votes(self, message):
         if message.author.id != self.bot.user.id:
             if self.getPollByChannel(message):
-                    self.getPollByChannel(message).checkAnswer(message)
+                self.getPollByChannel(message).checkAnswer(message)
 
     async def reaction_listener(self, reaction, user):
         # Listener is required to remove bad reactions
@@ -133,7 +133,7 @@ class NewReactPoll():
         for answer in msg:  # {id : {answer, votes}}
             base_emoji[0] += 1
             self.emojis.append(chr(base_emoji[0]) + chr(base_emoji[1]))
-            answer = self.emojis[i-1] + ' ' + answer
+            answer = self.emojis[i - 1] + ' ' + answer
             self.answers[i] = {"ANSWER": answer, "VOTES": 0}
             i += 1
         self.message = None
@@ -166,9 +166,9 @@ class NewReactPoll():
         msg = "**POLL ENDED!**\n\n{}\n\n".format(self.question)
         for reaction in self.message.reactions:
             if reaction.emoji in self.emojis:
-                self.answers[ord(reaction.emoji[0])-48]["VOTES"] = reaction.count - 1
+                self.answers[ord(reaction.emoji[0]) - 48]["VOTES"] = reaction.count - 1
         await self.client.clear_reactions(self.message)
-        cur_max = 0 # Track the winning number of votes
+        cur_max = 0  # Track the winning number of votes
         # Double iteration probably not the fastest way, but works for now
         for data in self.answers.values():
             if data["VOTES"] > cur_max:
