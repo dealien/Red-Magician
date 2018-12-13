@@ -10,7 +10,7 @@ from discord.ext import commands
 import re
 
 
-class StringFuncs:
+class StringUtilities:
     """A cog that provides various string analysis and manipulation commands."""
 
     def __init__(self, bot):
@@ -27,6 +27,14 @@ class StringFuncs:
         """Returns the length of the input string."""
         await self.bot.say('`' + str(len(input_string)) + '`')
 
+    @_string.command(pass_context=True)
+    async def reverse(self, ctx, input_string):
+        """Returns the input string backwards."""
+        reverse = ''
+        for i in input_string:
+            reverse = i + reverse
+        await self.bot.say('`' + reverse + '`')
+
 
 def setup(bot):
-    bot.add_cog(StringFuncs(bot))
+    bot.add_cog(StringUtilities(bot))
