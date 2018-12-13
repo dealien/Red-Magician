@@ -195,7 +195,16 @@ class Settings:
 
     @property
     def prefixes(self):
-        return self.bot_settings["PREFIXES"]
+        # This universal prefix will always be active, allowing users to copy commands straight from the documentation
+        # without having to change the prefixes first
+        universal = '[p]'
+        if universal in self.bot_settings["PREFIXES"]:
+            return self.bot_settings["PREFIXES"]
+        else:
+            p = [universal]
+            for i in self.bot_settings["PREFIXES"]:
+                p.append(i)
+            return p
 
     @prefixes.setter
     def prefixes(self, value):
