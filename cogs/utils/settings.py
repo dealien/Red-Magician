@@ -19,8 +19,8 @@ class Settings:
             "OWNER": None,
             "PREFIXES": [],
             "default": {
-                "ADMIN_ROLE": "Transistor",
-                "MOD_ROLE": "Process",
+                "ADMIN_ROLE": "Archmage",
+                "MOD_ROLE": "Mage",
                 "PREFIXES": []
             },
             "MEMCACHIER_SERVERS": None,
