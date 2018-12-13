@@ -45,10 +45,18 @@ class General:
                      "Don't count on it", "My reply is no", "My sources say no", "Outlook not so good", "Very doubtful"]
         self.poll_sessions = []
 
-    @commands.command(hidden=True)
-    async def ping(self):
-        """Pong."""
-        await self.bot.say("Pong.")
+    @commands.command(pass_context=True, hidden=True)
+    async def ping(self, ctx):
+        """Pong.
+
+        Also outputs the time difference between the ping/pong messages in milliseconds."""
+        pingm = ctx.message
+        pongm = await self.bot.say("`Pong`")
+        d = pongm.timestamp - pingm.timestamp
+        latency = int(d.total_seconds() * 1000)  # Gets the time difference in milliseconds
+        mt='`Pong ({} ms)`'.format(latency)
+        print('Pong ({} ms)'.format(latency))
+        await self.bot.edit_message(pongm,new_content=mt)
 
     @commands.command()
     async def choose(self, *choices):
